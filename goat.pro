@@ -21,7 +21,8 @@ SOURCES += \
     ui/Highlighter.cpp \
     ui/AboutDialog.cpp \
     src/Connection.cpp \
-    ui/ConnectionDialog.cpp
+    ui/ConnectionDialog.cpp \
+    ui/LoginDialog.cpp
 
 HEADERS  += \
     src/ConnectionManager.h \
@@ -31,13 +32,15 @@ HEADERS  += \
     ui/Highlighter.h \
     ui/AboutDialog.h \
     src/Connection.h \
-    ui/ConnectionDialog.h
+    ui/ConnectionDialog.h \
+    ui/LoginDialog.h
 
 FORMS    += \
     ui/MainWindow.ui \
     ui/ConnectionTab.ui \
     ui/AboutDialog.ui \
-    ui/ConnectionDialog.ui
+    ui/ConnectionDialog.ui \
+    ui/LoginDialog.ui
 
 DISTFILES += \
     LICENSE \

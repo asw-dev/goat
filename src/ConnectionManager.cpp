@@ -10,6 +10,8 @@
 #include <QString>
 #include <QUuid>
 
+#include "ui/LoginDialog.h"
+
 ConnectionManager::ConnectionManager()
 {
     foreach(Connection connection, loadConnections())
@@ -35,10 +37,25 @@ void ConnectionManager::openConnection(const Connection &connection)
     QSqlDatabase db = QSqlDatabase::addDatabase(connection.driver(), connection.connectionId());
 
     db.setHostName(connection.details()["server"]);
-    db.setDatabaseName(connection.details()["database"]);
-    db.setUserName(connection.details()["username"]);
-    db.setPassword(connection.details()["pass"]);
     db.setPort(connection.details()["port"].toInt());
+    db.setDatabaseName(connection.details()["database"]);
+
+    QString user = connection.details()["username"];
+    QString pass = connection.details()["pass"];
+
+    if (user.isEmpty() && connection.driver() != "QSQLITE")
+    {
+        LoginDialog dialog;
+        if (dialog.exec() != QDialog::Accepted)
+        {
+            QSqlDatabase::removeDatabase(connection.connectionId());
+            return;
+        }
+        user = dialog.user();
+        pass = dialog.pass();
+    }
+    db.setUserName(user);
+    db.setPassword(pass);
 
 	bool ok = db.open();
 
@@ -91,6 +108,7 @@ void ConnectionManager::saveConnection(const Connection &connection)
     settings.setValue("driver", connection.driver());
     settings.setValue("name", connection.name());
 
+    //TODO use save storage (like libsecret) to store password
     foreach(QString key, connection.details().keys())
     {
         settings.setValue(key, connection.details()[key]);

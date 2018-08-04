@@ -31,6 +31,7 @@ private slots:
     void on_txtUser_textChanged(const QString &arg1);
     void on_txtPass_textChanged(const QString &arg1);
     void on_chooseDatabaseFileButton_clicked();
+    void on_saveCedentialsCheckBox_clicked();
 
 private:
     Ui::ConnectionDialog *ui;
@@ -44,6 +45,7 @@ private:
     QString driver();
     QString getUiDriver();
     void updateConnection();
+    void refreshEnabled();
 };
 
 #endif // CONNECTIONDIALOG_H

@@ -35,6 +35,21 @@ ConnectionDialog::~ConnectionDialog() {
 	delete ui;
 }
 
+void ConnectionDialog::refreshEnabled()
+{
+    QString driver = ui->listDropdownDBDriver->currentData(Qt::UserRole + 1).toString();
+    ui->chooseDatabaseFileButton->setDisabled(driver != "QSQLITE");
+    ui->txtServer->setDisabled(driver == "QSQLITE");
+    ui->txtPort->setDisabled(driver == "QSQLITE");
+    ui->saveCedentialsCheckBox->setDisabled(driver == "QSQLITE");
+    ui->txtUser->setDisabled(driver == "QSQLITE");
+    ui->txtPass->setDisabled(driver == "QSQLITE");
+    ui->credentialWarningImgLabel->setDisabled(!ui->saveCedentialsCheckBox->isChecked());
+    ui->credentialWarningImgLabel->setDisabled(!ui->saveCedentialsCheckBox->isChecked());
+    ui->txtUser->setDisabled(!ui->saveCedentialsCheckBox->isChecked());
+    ui->txtPass->setDisabled(!ui->saveCedentialsCheckBox->isChecked());
+}
+
 void ConnectionDialog::setUiValues(const Connection &connection)
 {
     int idx = ui->listDropdownDBDriver->findData(connection.driver(), Qt::UserRole + 1);
@@ -46,11 +61,7 @@ void ConnectionDialog::setUiValues(const Connection &connection)
     ui->txtUser->setText(connection.details()["username"]);
     ui->txtPass->setText(connection.details()["pass"]);
 
-    ui->chooseDatabaseFileButton->setDisabled(connection.driver() != "QSQLITE");
-    ui->txtServer->setDisabled(connection.driver() == "QSQLITE");
-    ui->txtPort->setDisabled(connection.driver() == "QSQLITE");
-    ui->txtUser->setDisabled(connection.driver() == "QSQLITE");
-    ui->txtPass->setDisabled(connection.driver() == "QSQLITE");
+    refreshEnabled();
 }
 
 Connection ConnectionDialog::buildConnection()
@@ -113,6 +124,11 @@ void ConnectionDialog::on_listDropdownDBDriver_currentIndexChanged(int index)
             details.remove("port");
             details.remove("username");
             details.remove("pass");
+            ui->saveCedentialsCheckBox->setChecked(false);
+        }
+        else if (oldDriver == "QSQLITE")
+        {
+            ui->saveCedentialsCheckBox->setChecked(true);
         }
     }
 
@@ -183,4 +199,16 @@ void ConnectionDialog::on_chooseDatabaseFileButton_clicked()
             ui->txtDatabase->setText(filename);
         }
     }
+}
+
+void ConnectionDialog::on_saveCedentialsCheckBox_clicked()
+{
+    if (!ui->saveCedentialsCheckBox->isChecked())
+    {
+        ui->txtUser->setText("");
+        ui->txtPass->setText("");
+    }
+
+    refreshEnabled();
+    updateConnection();
 }
