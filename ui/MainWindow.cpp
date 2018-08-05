@@ -147,7 +147,7 @@ void MainWindow::on_newConnectionButton_clicked()
     }
 }
 
-void MainWindow::on_connectionComboBox_currentIndexChanged(int index)
+void MainWindow::on_connectionComboBox_currentIndexChanged(int)
 {
     invalidateEnabledStates();
 }
