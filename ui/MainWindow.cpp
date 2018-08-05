@@ -185,8 +185,6 @@ void MainWindow::invalidateEnabledStates()
     ui->actionCloseConnection->setDisabled(!isOpen);
     ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists);
     ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists);
-//    ui->queryFileButton->setDisabled(!connectionAtIndex || !queryExists);
-//    ui->actionQuery_File->setDisabled(!connectionAtIndex || !queryExists);
 }
 
 void MainWindow::on_editConnectionButton_clicked()
