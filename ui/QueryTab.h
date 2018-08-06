@@ -1,5 +1,5 @@
-#ifndef CONNECTIONTAB_H
-#define CONNECTIONTAB_H
+#ifndef QUERYTAB_H
+#define QUERYTAB_H
 
 #include <QPlainTextEdit>
 #include <QString>
@@ -12,10 +12,10 @@
 #include <QComboBox>
 
 namespace Ui {
-class ConnectionTab;
+class QueryTab;
 }
 
-class ConnectionTab : public QWidget
+class QueryTab : public QWidget
 {
 	Q_OBJECT
 
@@ -23,8 +23,8 @@ signals:
    void textChanged();
 
 public:
-    explicit ConnectionTab(QString filename, QWidget *parent = 0);
-	~ConnectionTab();
+    explicit QueryTab(QString filename, QWidget *parent = 0);
+   ~QueryTab();
     void executeQueryAtCursor(QSqlDatabase sqlDatabase);
     void executeQuery(QSqlDatabase sqlDatabase, QString query);
     QString filename() const;
@@ -35,9 +35,9 @@ public:
     void writeFile();
 
 private:
-    Ui::ConnectionTab *ui;
+    Ui::QueryTab *ui;
     QSqlQueryModel* m_queryResultsModel;
     QString m_filename;
 };
 
-#endif // CONNECTIONTAB_H
+#endif // QUERYTAB_H

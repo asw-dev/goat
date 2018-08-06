@@ -1,6 +1,5 @@
-#include "ConnectionTab.h"
-#include "ui_ConnectionTab.h"
-#include "src/ConnectionManager.h"
+#include "QueryTab.h"
+#include "ui_QueryTab.h"
 
 #include <QAction>
 #include <QComboBox>
@@ -21,8 +20,9 @@
 #include <QTextCursor>
 #include <QVBoxLayout>
 
-ConnectionTab::ConnectionTab(QString filename, QWidget *parent) : QWidget(parent), ui(new Ui::ConnectionTab)
+QueryTab::QueryTab(QString filename, QWidget *parent) : QWidget(parent)
 {
+    ui = new Ui::QueryTab;
 	ui->setupUi(this);
 
     m_queryResultsModel = new QSqlQueryModel(this);
@@ -38,17 +38,17 @@ ConnectionTab::ConnectionTab(QString filename, QWidget *parent) : QWidget(parent
     connect(ui->codeEditor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
 }
 
-ConnectionTab::~ConnectionTab()
+QueryTab::~QueryTab()
 {
 	delete ui;
 }
 
-void ConnectionTab::executeQueryAtCursor(QSqlDatabase sqlDatabase)
+void QueryTab::executeQueryAtCursor(QSqlDatabase sqlDatabase)
 {
     executeQuery(sqlDatabase, ui->codeEditor->getQueryAtCursor());
 }
 
-void ConnectionTab::executeQuery(QSqlDatabase sqlDatabase, QString query)
+void QueryTab::executeQuery(QSqlDatabase sqlDatabase, QString query)
 {
     if (query.trimmed().isEmpty())
         return;
@@ -85,22 +85,22 @@ void ConnectionTab::executeQuery(QSqlDatabase sqlDatabase, QString query)
     ui->resultsText->appendPlainText(q.lastQuery());
 }
 
-bool ConnectionTab::modified() const
+bool QueryTab::modified() const
 {
     return ui->codeEditor->document()->isModified();
 }
 
-void ConnectionTab::setModified(const bool &modified)
+void QueryTab::setModified(const bool &modified)
 {
     ui->codeEditor->document()->setModified(modified);
 }
 
-QString ConnectionTab::filename() const
+QString QueryTab::filename() const
 {
     return m_filename;
 }
 
-void ConnectionTab::readFile()
+void QueryTab::readFile()
 {
     if (m_filename.isEmpty())
         return;
@@ -126,7 +126,7 @@ void ConnectionTab::readFile()
     file.close();
 }
 
-void ConnectionTab::writeFile()
+void QueryTab::writeFile()
 {
     if (m_filename.isEmpty())
     {
@@ -160,7 +160,7 @@ void ConnectionTab::writeFile()
     }
 }
 
-void ConnectionTab::setFilename(const QString &filename)
+void QueryTab::setFilename(const QString &filename)
 {
     m_filename = filename;
 }

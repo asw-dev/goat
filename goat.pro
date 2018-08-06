@@ -16,31 +16,32 @@ SOURCES += \
     src/main.cpp \
     src/ConnectionManager.cpp \
     ui/MainWindow.cpp \
-    ui/ConnectionTab.cpp \
     ui/CodeEditor.cpp \
     ui/Highlighter.cpp \
     ui/AboutDialog.cpp \
     src/Connection.cpp \
     ui/ConnectionDialog.cpp \
-    ui/LoginDialog.cpp
+    ui/LoginDialog.cpp \
+    ui/QueryTab.cpp
+
 
 HEADERS  += \
     src/ConnectionManager.h \
     ui/MainWindow.h \
-    ui/ConnectionTab.h \
     ui/CodeEditor.h \
     ui/Highlighter.h \
     ui/AboutDialog.h \
     src/Connection.h \
     ui/ConnectionDialog.h \
-    ui/LoginDialog.h
+    ui/LoginDialog.h \
+    ui/QueryTab.h
 
 FORMS    += \
     ui/MainWindow.ui \
-    ui/ConnectionTab.ui \
     ui/AboutDialog.ui \
     ui/ConnectionDialog.ui \
-    ui/LoginDialog.ui
+    ui/LoginDialog.ui \
+    ui/QueryTab.ui
 
 DISTFILES += \
     LICENSE \
