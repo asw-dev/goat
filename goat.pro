@@ -23,7 +23,9 @@ SOURCES += \
     ui/ConnectionDialog.cpp \
     ui/LoginDialog.cpp \
     ui/QueryTab.cpp \
-    src/Csv.cpp
+    src/Csv.cpp \
+    src/Credentials.cpp \
+    src/Query.cpp
 
 
 HEADERS  += \
@@ -37,7 +39,9 @@ HEADERS  += \
     ui/LoginDialog.h \
     ui/QueryTab.h \
     src/Csv.h \
-    src/QueryState.h
+    src/QueryState.h \
+    src/Credentials.h \
+    src/Query.h
 
 FORMS    += \
     ui/MainWindow.ui \

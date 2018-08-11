@@ -16,24 +16,18 @@ Connection Connection::defaultConnection(const QString &driver)
         details["server"] = "localhost";
         details["port"] = "5432";
         details["database"] = "public";
-        details["username"] = "postgres";
-        details["pass"] = "";
     }
     else if (connection.driver() == "QMYSQL")
     {
         details["server"] = "localhost";
         details["port"] = "3306";
         details["database"] = "";
-        details["username"] = "root";
-        details["pass"] = "";
     }
     else if (connection.driver() == "QSQLITE")
     {
         details["server"] = "";
         details["port"] = "";
         details["database"] = ":memory:";
-        details["username"] = "";
-        details["pass"] = "";
     }
 
     connection.setDetails(details);
@@ -61,7 +55,6 @@ QString Connection::defaultName(const Connection &connection)
     if (type == "?")
         return "New Connection";
 
-    QString user = connection.details().contains("username") ? connection.details()[("username")] : "";
     QString server = connection.details().contains("server") ? connection.details()[("server")] : "";
     QString port = connection.details().contains("port") ? connection.details()[("port")] : "";
     QString database = connection.details().contains("database") ? connection.details()[("database")] : "";
@@ -77,7 +70,6 @@ QString Connection::defaultName(const Connection &connection)
     }
     else
     {
-        name += user + (user.isEmpty() ? "" : "@");
         name += server;
         name += (port.isEmpty() ? "" : ":") + port;
         name += (database.isEmpty() || name.isEmpty() ? "" : "/") + database;
@@ -96,8 +88,6 @@ Connection::Connection()
     m_details["server"] = "";
     m_details["port"] = "";
     m_details["database"] = "";
-    m_details["username"] = "";
-    m_details["pass"] = "";
 }
 
 Connection::Connection(const QString &connectionId, const QString &driver, const QString &name, const QMap<QString, QString> &details)

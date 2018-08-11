@@ -140,36 +140,19 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="openConnectionButton">
+         <widget class="QPushButton" name="clearCredentialsButton">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="toolTip">
-           <string>Open Connection</string>
+           <string>Clear Credentials</string>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="icon">
            <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk/icons/silk/connect.png</normaloff>:/icons/silk/icons/silk/connect.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="closeConnectionButton">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Close Connection</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk/icons/silk/disconnect.png</normaloff>:/icons/silk/icons/silk/disconnect.png</iconset>
+            <normaloff>:/icons/silk/icons/silk/database_lightning.png</normaloff>:/icons/silk/icons/silk/database_lightning.png</iconset>
           </property>
          </widget>
         </item>
@@ -275,9 +258,7 @@
     <addaction name="actionNewConnection"/>
     <addaction name="actionEditConnection"/>
     <addaction name="actionDeleteConnection"/>
-    <addaction name="separator"/>
-    <addaction name="actionOpenConnection"/>
-    <addaction name="actionCloseConnection"/>
+    <addaction name="actionClearCredentials"/>
    </widget>
    <widget class="QMenu" name="menuQuery">
     <property name="title">
@@ -427,7 +408,15 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Export Results</string>
+    <string>&amp;Export Results</string>
+   </property>
+  </action>
+  <action name="actionClearCredentials">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Clear Credentials</string>
    </property>
   </action>
  </widget>
@@ -436,22 +425,6 @@
   <include location="../resources/icons.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>actionCloseConnection</sender>
-   <signal>triggered()</signal>
-   <receiver>closeConnectionButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>776</x>
-     <y>53</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionNewFile</sender>
    <signal>triggered()</signal>
@@ -533,22 +506,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionOpenConnection</sender>
-   <signal>triggered()</signal>
-   <receiver>openConnectionButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>739</x>
-     <y>53</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSaveFile</sender>
    <signal>triggered()</signal>
    <receiver>saveFileButton</receiver>
@@ -576,6 +533,22 @@
     </hint>
     <hint type="destinationlabel">
      <x>60</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearCredentials</sender>
+   <signal>triggered()</signal>
+   <receiver>clearCredentialsButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>560</x>
      <y>53</y>
     </hint>
    </hints>

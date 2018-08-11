@@ -2,16 +2,10 @@
 #define QUERYTAB_H
 
 #include "src/QueryState.h"
+#include "src/Query.h"
 
-#include <QPlainTextEdit>
 #include <QString>
 #include <QWidget>
-#include <QWidget>
-#include <QSqlDatabase>
-#include <QTableView>
-#include <QSqlQueryModel>
-#include <QSplitter>
-#include <QComboBox>
 
 namespace Ui {
 class QueryTab;
@@ -28,8 +22,7 @@ signals:
 public:
     explicit QueryTab(QString filename, QWidget *parent = 0);
    ~QueryTab();
-    void executeQueryAtCursor(QSqlDatabase sqlDatabase);
-    void executeQuery(QSqlDatabase sqlDatabase, QString query);
+    void executeQuery(const Connection &connection, Credentials *credentials);
     QString filename() const;
     void setFilename(const QString &filename);
     bool modified() const;
@@ -45,12 +38,14 @@ public slots:
 
 private:
     Ui::QueryTab *ui;
-    QSqlQueryModel* m_queryResultsModel;
     QString m_filename;
     QueryState m_queryState;
+    Query *m_query;
+    QThread *m_queryThread;
 
-    void onQuerySucess(QSqlQuery query, QDateTime start);
-    void onQueryFailure(QSqlQuery query, QDateTime start);
+private slots:
+    void onQuerySucess();
+    void onQueryFailure();
 };
 
 #endif // QUERYTAB_H

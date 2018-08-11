@@ -5,14 +5,10 @@
 #include "ui/AboutDialog.h"
 
 #include <QCloseEvent>
-#include <QDebug>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QStandardItem>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -171,25 +167,17 @@ void MainWindow::invalidateEnabledStates()
     ui->deleteConnectionButton->setDisabled(!connectionAtIndex);
     ui->actionDeleteConnection->setDisabled(!connectionAtIndex);
 
-    bool isOpen = false;
     bool queryExists = ui->tabBarConnections->currentIndex() != -1;
-
-    if (connectionAtIndex)
-    {
-        QString connectionId = ui->connectionComboBox->itemData(index).toString();
-        Connection connection = m_connectionManager.getConnections()[connectionId];
-        isOpen = m_connectionManager.isOpen(connectionId);
-    }
-
     QueryTab *queryTab = (QueryTab*) ui->tabBarConnections->currentWidget();
+    bool queryReady = queryTab && queryTab->queryState() != ACTIVE;
 
-    ui->openConnectionButton->setDisabled(isOpen);
-    ui->actionOpenConnection->setDisabled(isOpen);
-    ui->closeConnectionButton->setDisabled(!isOpen);
-    ui->actionCloseConnection->setDisabled(!isOpen);
-    ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists);
-    ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists);
+    ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
+    ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
     ui->actionExportResults->setDisabled(!queryTab || !queryTab->hasResults());
+
+    bool hasCredentials = connectionAtIndex && m_credentials.contains(ui->connectionComboBox->itemData(index).toString());
+    ui->clearCredentialsButton->setDisabled(!hasCredentials);
+    ui->actionClearCredentials->setDisabled(!hasCredentials);
 }
 
 void MainWindow::on_editConnectionButton_clicked()
@@ -217,36 +205,14 @@ void MainWindow::on_deleteConnectionButton_clicked()
     invalidateEnabledStates();
 }
 
-void MainWindow::on_openConnectionButton_clicked()
-{
-    int index = ui->connectionComboBox->currentIndex();
-    QString connectionId = ui->connectionComboBox->itemData(index).toString();
-    m_connectionManager.openConnection(m_connectionManager.getConnections()[connectionId]);
-    invalidateEnabledStates();
-}
-
-void MainWindow::on_closeConnectionButton_clicked()
-{
-    int index = ui->connectionComboBox->currentIndex();
-    QString connectionId = ui->connectionComboBox->itemData(index).toString();
-    m_connectionManager.closeConnection(connectionId);
-    invalidateEnabledStates();
-}
-
 void MainWindow::on_queryBlockButton_clicked()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
 
-    if (!m_connectionManager.isOpen(connectionId))
-        on_openConnectionButton_clicked();
-
-    if (!m_connectionManager.isOpen(connectionId))
-        return;
-
     QueryTab *tab = ((QueryTab*) ui->tabBarConnections->currentWidget());
-    QSqlDatabase db = m_connectionManager.getOpenConnection(connectionId);
-    tab->executeQueryAtCursor(db);
+    Connection connection = m_connectionManager.getConnections()[connectionId];
+    tab->executeQuery(connection, &m_credentials);
 }
 
 void MainWindow::on_actionCloseFile_triggered()
@@ -335,4 +301,12 @@ void MainWindow::on_actionExportResults_triggered()
     if (!queryTab)
         return;
     queryTab->on_button_exportQueryResults_clicked();
+}
+
+void MainWindow::on_clearCredentialsButton_clicked()
+{
+    int index = ui->connectionComboBox->currentIndex();
+    QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    m_credentials.remove(connectionId);
+    invalidateEnabledStates();
 }

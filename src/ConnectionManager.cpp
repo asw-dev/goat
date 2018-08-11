@@ -1,16 +1,7 @@
 #include "ConnectionManager.h"
 
-#include <QDebug>
-#include <QGridLayout>
-#include <QMessageBox>
 #include <QSettings>
-#include <QSpacerItem>
-#include <QSqlDatabase>
-#include <QSqlError>
 #include <QString>
-#include <QUuid>
-
-#include "ui/LoginDialog.h"
 
 ConnectionManager::ConnectionManager()
 {
@@ -20,84 +11,8 @@ ConnectionManager::ConnectionManager()
     }
 }
 
-ConnectionManager::~ConnectionManager()
-{
-    foreach(Connection connection, m_connections.values())
-    {
-        closeConnection(connection.connectionId());
-    }
-    m_connections.clear();
-}
-
-void ConnectionManager::openConnection(const Connection &connection)
-{
-    if (QSqlDatabase::contains(connection.connectionId()))
-        return;
-
-    QSqlDatabase db = QSqlDatabase::addDatabase(connection.driver(), connection.connectionId());
-
-    db.setHostName(connection.details()["server"]);
-    db.setPort(connection.details()["port"].toInt());
-    db.setDatabaseName(connection.details()["database"]);
-
-    QString user = connection.details()["username"];
-    QString pass = connection.details()["pass"];
-
-    if (user.isEmpty() && connection.driver() != "QSQLITE")
-    {
-        LoginDialog dialog;
-        if (dialog.exec() != QDialog::Accepted)
-        {
-            QSqlDatabase::removeDatabase(connection.connectionId());
-            return;
-        }
-        user = dialog.user();
-        pass = dialog.pass();
-    }
-    db.setUserName(user);
-    db.setPassword(pass);
-
-	bool ok = db.open();
-
-    if (!ok)
-    {
-        QSqlDatabase::removeDatabase(connection.connectionId());
-
-		qDebug() << "Error making connection";
-
-		QString e1 = db.lastError().driverText() + "\n\n"
-				   + db.lastError().databaseText() + "\n\n"
-				   + "Native error code: " + db.lastError().nativeErrorCode();
-
-		QMessageBox errorCreatingDBConnectionDialog;
-		errorCreatingDBConnectionDialog.setWindowTitle("Error");
-		errorCreatingDBConnectionDialog.setText("Error creating DB connection?");
-		errorCreatingDBConnectionDialog.setInformativeText(e1);
-		errorCreatingDBConnectionDialog.setIcon(QMessageBox::Critical);
-		errorCreatingDBConnectionDialog.setStandardButtons(QMessageBox::Ok);
-		errorCreatingDBConnectionDialog.setMinimumSize(QSize(600, 120));
-		QSpacerItem* horizontalSpacer = new QSpacerItem(500, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-		QGridLayout* layout = (QGridLayout*)errorCreatingDBConnectionDialog.layout();
-		layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-
-		errorCreatingDBConnectionDialog.exec();
-	}
-}
-
-void ConnectionManager::closeConnection(const QString &connectionId)
-{
-    if (!QSqlDatabase::contains(connectionId))
-        return;
-
-    QSqlDatabase::database(connectionId).close();
-    QSqlDatabase::removeDatabase(connectionId);
-}
-
 void ConnectionManager::saveConnection(const Connection &connection)
 {
-    if (m_connections.contains(connection.connectionId()))
-        closeConnection(connection.connectionId());
-
     m_connections[connection.connectionId()] = connection;
 
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "connections");
@@ -108,7 +23,6 @@ void ConnectionManager::saveConnection(const Connection &connection)
     settings.setValue("driver", connection.driver());
     settings.setValue("name", connection.name());
 
-    //TODO use save storage (like libsecret) to store password
     foreach(QString key, connection.details().keys())
     {
         settings.setValue(key, connection.details()[key]);
@@ -120,25 +34,9 @@ void ConnectionManager::saveConnection(const Connection &connection)
 
 void ConnectionManager::deleteConnection(const QString &connectionId)
 {
-    closeConnection(connectionId);
-    m_connections.remove(connectionId);
-
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "connections");
     settings.remove(connectionId);
     settings.sync();
-}
-
-bool ConnectionManager::isOpen(const QString &connectionId) const
-{
-    return QSqlDatabase::contains(connectionId);
-}
-
-QSqlDatabase ConnectionManager::getOpenConnection(const QString &connectionId)
-{
-    if (!isOpen(connectionId))
-        qDebug() << "Call to ConnectionManager::getOpenConnection() was make with non-open connectionId " << connectionId;
-
-    return QSqlDatabase::database(connectionId);
 }
 
 QMap<QString, Connection> ConnectionManager::getConnections() const

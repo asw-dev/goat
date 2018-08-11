@@ -6,35 +6,35 @@
 
 #include "src/Connection.h"
 #include "src/ConnectionManager.h"
+#include "src/Credentials.h"
 #include "ui/QueryTab.h"
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
-public:
-	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+  public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
     void changeTabFilename(QueryTab *connectionTab);
     void saveTab(QueryTab *connectionTab);
 
-private slots:
+  private slots:
     void invalidateEnabledStates();
-	void on_actionExit_triggered();
-	void on_tabBarConnections_tabCloseRequested(int index);
+    void on_actionExit_triggered();
+    void on_tabBarConnections_tabCloseRequested(int index);
     void on_actionAbout_triggered();
     void on_newFileButton_clicked();
     void on_newConnectionButton_clicked();
     void on_connectionComboBox_currentIndexChanged(int index);
     void on_editConnectionButton_clicked();
     void on_deleteConnectionButton_clicked();
-    void on_openConnectionButton_clicked();
-    void on_closeConnectionButton_clicked();
     void on_queryBlockButton_clicked();
     void on_actionCloseFile_triggered();
     void on_openFileButton_clicked();
@@ -42,6 +42,7 @@ private slots:
     void on_currentTabTextChanged();
     void on_actionSaveFileAs_triggered();
     void on_actionExportResults_triggered();
+    void on_clearCredentialsButton_clicked();
 
 private:
     void closeEvent(QCloseEvent *event);
@@ -50,6 +51,7 @@ private:
 
     Ui::MainWindow *ui;
     ConnectionManager m_connectionManager;
+    Credentials m_credentials;
 };
 
 #endif // MAINWINDOW_H

@@ -28,10 +28,7 @@ private slots:
     void on_txtServer_textChanged(const QString &arg1);
     void on_txtPort_textChanged(const QString &arg1);
     void on_txtDatabase_textChanged(const QString &arg1);
-    void on_txtUser_textChanged(const QString &arg1);
-    void on_txtPass_textChanged(const QString &arg1);
     void on_chooseDatabaseFileButton_clicked();
-    void on_saveCedentialsCheckBox_clicked();
 
 private:
     Ui::ConnectionDialog *ui;
