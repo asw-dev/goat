@@ -1,6 +1,8 @@
 #ifndef QUERYTAB_H
 #define QUERYTAB_H
 
+#include "src/QueryState.h"
+
 #include <QPlainTextEdit>
 #include <QString>
 #include <QWidget>
@@ -21,6 +23,7 @@ class QueryTab : public QWidget
 
 signals:
    void textChanged();
+   void queryStateChanged();
 
 public:
     explicit QueryTab(QString filename, QWidget *parent = 0);
@@ -33,11 +36,21 @@ public:
     void setModified(const bool &modified);
     void readFile();
     void writeFile();
+    void clearResults();
+    QueryState queryState() const;
+    bool hasResults();
+
+public slots:
+    void on_button_exportQueryResults_clicked();
 
 private:
     Ui::QueryTab *ui;
     QSqlQueryModel* m_queryResultsModel;
     QString m_filename;
+    QueryState m_queryState;
+
+    void onQuerySucess(QSqlQuery query, QDateTime start);
+    void onQueryFailure(QSqlQuery query, QDateTime start);
 };
 
 #endif // QUERYTAB_H

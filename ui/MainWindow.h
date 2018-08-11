@@ -24,6 +24,7 @@ public:
     void saveTab(QueryTab *connectionTab);
 
 private slots:
+    void invalidateEnabledStates();
 	void on_actionExit_triggered();
 	void on_tabBarConnections_tabCloseRequested(int index);
     void on_actionAbout_triggered();
@@ -40,14 +41,14 @@ private slots:
     void on_saveFileButton_clicked();
     void on_currentTabTextChanged();
     void on_actionSaveFileAs_triggered();
+    void on_actionExportResults_triggered();
 
 private:
     void closeEvent(QCloseEvent *event);
     void writeSettings();
     void readSettings();
-    void invalidateEnabledStates();
 
-	Ui::MainWindow *ui;
+    Ui::MainWindow *ui;
     ConnectionManager m_connectionManager;
 };
 

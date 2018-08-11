@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
     {
         ui->connectionComboBox->addItem(connection.name(), connection.connectionId()); //TODO order this by name?
     }
+    connect(ui->tabBarConnections, SIGNAL(currentChanged(int)), this, SLOT(invalidateEnabledStates()));
 }
 
 MainWindow::~MainWindow() {
@@ -130,6 +131,7 @@ void MainWindow::on_newFileButton_clicked()
     ui->tabBarConnections->setCurrentIndex(ui->tabBarConnections->count()-1);
 
     connect(queryTab, SIGNAL(textChanged()), this, SLOT(on_currentTabTextChanged()));
+    connect(queryTab, SIGNAL(queryStateChanged()), this, SLOT(invalidateEnabledStates()));
     invalidateEnabledStates();
 }
 
@@ -179,12 +181,15 @@ void MainWindow::invalidateEnabledStates()
         isOpen = m_connectionManager.isOpen(connectionId);
     }
 
+    QueryTab *queryTab = (QueryTab*) ui->tabBarConnections->currentWidget();
+
     ui->openConnectionButton->setDisabled(isOpen);
     ui->actionOpenConnection->setDisabled(isOpen);
     ui->closeConnectionButton->setDisabled(!isOpen);
     ui->actionCloseConnection->setDisabled(!isOpen);
     ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists);
     ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists);
+    ui->actionExportResults->setDisabled(!queryTab || !queryTab->hasResults());
 }
 
 void MainWindow::on_editConnectionButton_clicked()
@@ -270,6 +275,7 @@ void MainWindow::on_openFileButton_clicked()
         ui->tabBarConnections->setCurrentIndex(ui->tabBarConnections->count()-1);
 
         connect(queryTab, SIGNAL(textChanged()), this, SLOT(on_currentTabTextChanged()));
+        connect(queryTab, SIGNAL(queryStateChanged()), this, SLOT(invalidateEnabledStates()));
         invalidateEnabledStates();
     }
 }
@@ -321,4 +327,12 @@ void MainWindow::on_currentTabTextChanged()
         if (!currentTabText.startsWith("*"))
             ui->tabBarConnections->setTabText(index, "*" + currentTabText);
     }
+}
+
+void MainWindow::on_actionExportResults_triggered()
+{
+    QueryTab *queryTab = ((QueryTab*) ui->tabBarConnections->currentWidget());
+    if (!queryTab)
+        return;
+    queryTab->on_button_exportQueryResults_clicked();
 }

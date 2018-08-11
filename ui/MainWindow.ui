@@ -284,6 +284,8 @@
      <string>&amp;Query</string>
     </property>
     <addaction name="actionQueryBlockAtCursor"/>
+    <addaction name="separator"/>
+    <addaction name="actionExportResults"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConnection"/>
@@ -418,6 +420,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionExportResults">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Export Results</string>
    </property>
   </action>
  </widget>
