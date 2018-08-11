@@ -73,7 +73,7 @@ void QueryTab::executeQuery(QSqlDatabase sqlDatabase, QString query)
         ui->resultsTabBar->setCurrentIndex(1);
     }
 
-    ui->resultsText->appendPlainText("Timestamp: " + end.toString("yyyy-mm-dd hh:mm:ss"));
+    ui->resultsText->appendPlainText("Timestamp: " + end.toString("yyyy-MM-dd hh:mm:ss"));
     ui->resultsText->appendPlainText("Elapsed: " + QString::number(start.msecsTo(end)) + " ms");
     if (success && !displayGrid)
         ui->resultsText->appendPlainText("Number of rows affected: " + QString::number(q.numRowsAffected()));
