@@ -33,7 +33,7 @@
           </property>
           <property name="icon">
            <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk/icons/silk/page_white.png</normaloff>:/icons/silk/icons/silk/page_white.png</iconset>
+            <normaloff>:/icons/silk/icons/silk/page_white_add.png</normaloff>:/icons/silk/icons/silk/page_white_add.png</iconset>
           </property>
          </widget>
         </item>
@@ -296,6 +296,10 @@
    </property>
   </action>
   <action name="actionNewFile">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/page_white_add.png</normaloff>:/icons/silk/icons/silk/page_white_add.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New File</string>
    </property>
@@ -306,6 +310,10 @@
   <action name="actionOpenFile">
    <property name="enabled">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/folder.png</normaloff>:/icons/silk/icons/silk/folder.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open File</string>
@@ -318,6 +326,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/disk.png</normaloff>:/icons/silk/icons/silk/disk.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Save File</string>
    </property>
@@ -326,6 +338,10 @@
    </property>
   </action>
   <action name="actionNewConnection">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/database_add.png</normaloff>:/icons/silk/icons/silk/database_add.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New Connection</string>
    </property>
@@ -333,6 +349,10 @@
   <action name="actionEditConnection">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/database_edit.png</normaloff>:/icons/silk/icons/silk/database_edit.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Edit Connection</string>
@@ -342,29 +362,21 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/database_delete.png</normaloff>:/icons/silk/icons/silk/database_delete.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Delete Connection</string>
-   </property>
-  </action>
-  <action name="actionOpenConnection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Open Connection</string>
-   </property>
-  </action>
-  <action name="actionCloseConnection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Close Connection</string>
    </property>
   </action>
   <action name="actionQueryBlockAtCursor">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/resultset_next.png</normaloff>:/icons/silk/icons/silk/resultset_next.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Query Block At Cursor</string>
@@ -373,18 +385,11 @@
     <string>Ctrl+Return</string>
    </property>
   </action>
-  <action name="actionQueryFile">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Query &amp;File</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+X</string>
-   </property>
-  </action>
   <action name="actionCloseFile">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/page_white_delete.png</normaloff>:/icons/silk/icons/silk/page_white_delete.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Close File</string>
    </property>
@@ -395,6 +400,10 @@
   <action name="actionSaveFileAs">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/drive_disk.png</normaloff>:/icons/silk/icons/silk/drive_disk.png</iconset>
    </property>
    <property name="text">
     <string>Save &amp;File As...</string>
@@ -407,6 +416,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/page_white_go.png</normaloff>:/icons/silk/icons/silk/page_white_go.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Export Results</string>
    </property>
@@ -415,8 +428,12 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/database_lightning.png</normaloff>:/icons/silk/icons/silk/database_lightning.png</iconset>
+   </property>
    <property name="text">
-    <string>Clear Credentials</string>
+    <string>&amp;Clear Credentials</string>
    </property>
   </action>
  </widget>
