@@ -7,6 +7,8 @@
 #include <QSqlRecord>
 #include <QUuid>
 
+#define LIGHT_YELLOW QColor("#FFFFE0")
+
 Query::Query(const Connection &connection, Credentials *credentials, const QString &queryTxt) : QObject()
 {
     m_queryId = connection.connectionId() + ":" + QUuid::createUuid().toString().mid(1, 36);
@@ -101,6 +103,8 @@ bool Query::runQuery(const QSqlDatabase &db)
                     QModelIndex index = model->index(row, col);
                     QVariant value = record.value(col);
                     model->setData(index, value);
+                    if (value.isNull())
+                        model->setData(index, LIGHT_YELLOW, Qt::BackgroundRole);
                 }
             }
             m_results.append(model);
