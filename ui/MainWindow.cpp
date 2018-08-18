@@ -18,8 +18,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
 
     foreach(Connection connection, m_connectionManager.getConnections().values())
     {
-        ui->connectionComboBox->addItem(connection.name(), connection.connectionId()); //TODO order this by name?
+        ui->connectionComboBox->addItem(connection.name(), connection.connectionId());
     }
+    ui->connectionComboBox->model()->sort(0);
+    if (ui->connectionComboBox->count())
+        ui->connectionComboBox->setCurrentIndex(0); //TODO remember setting from last session
     connect(ui->tabBarConnections, SIGNAL(currentChanged(int)), this, SLOT(invalidateEnabledStates()));
 }
 
@@ -144,8 +147,12 @@ void MainWindow::on_newConnectionButton_clicked()
         connection = dialog.getConnection();
         m_connectionManager.saveConnection(connection);
         ui->connectionComboBox->addItem(connection.name(), connection.connectionId());
-        int lastIndex = ui->connectionComboBox->count() - 1;
-        ui->connectionComboBox->setCurrentIndex(lastIndex);
+        ui->connectionComboBox->model()->sort(0);
+        int index = ui->connectionComboBox->model()->match(
+                    ui->connectionComboBox->model()->index(0, 0),
+                    Qt::UserRole,
+                    connection.connectionId()).at(0).row();
+        ui->connectionComboBox->setCurrentIndex(index);
     }
 }
 
@@ -196,6 +203,12 @@ void MainWindow::on_editConnectionButton_clicked()
         connection = dialog.getConnection();
         m_connectionManager.saveConnection(connection);
         ui->connectionComboBox->setItemText(index, connection.name());
+        ui->connectionComboBox->model()->sort(0);
+        index = ui->connectionComboBox->model()->match(
+                    ui->connectionComboBox->model()->index(0, 0),
+                    Qt::UserRole,
+                    connection.connectionId()).at(0).row();
+        ui->connectionComboBox->setCurrentIndex(index);
         invalidateEnabledStates();
     }
 }
