@@ -19,14 +19,14 @@ class Query : public QObject
 public:
     Query(const Connection &connection, Credentials *credentials, const QString &queryTxt);
     ~Query();
-    void cancel();
-
     QueryState queryState() const;
     QDateTime startTime() const;
     QDateTime endTime() const;
     QList<QStandardItemModel*> results() const;
     QString messages() const;
     int rowsAffected() const;
+    bool canCancel();
+    Query* cancel();
 
 signals:
     void queryFinished();
@@ -38,6 +38,7 @@ public slots:
 private:
     QString m_queryId;
     Connection m_connection;
+    int m_queryProcessId;
     Credentials *m_credentials;
     QString m_queryTxt;
     QList<QStandardItemModel*> m_results;
@@ -48,6 +49,7 @@ private:
     QDateTime m_endTime;
 
     bool runQuery(const QSqlDatabase &db);
+    void initQueryProcessId(const QSqlDatabase &db);
 };
 
 #endif // QUERYTHREAD_H

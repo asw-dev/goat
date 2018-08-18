@@ -189,6 +189,10 @@ void MainWindow::invalidateEnabledStates()
     bool hasCredentials = connectionAtIndex && m_credentials.contains(ui->connectionComboBox->itemData(index).toString());
     ui->clearCredentialsButton->setDisabled(!hasCredentials);
     ui->actionClearCredentials->setDisabled(!hasCredentials);
+
+    bool canCancel = queryTab && queryTab->canCancel();
+    ui->cancelQueryButton->setDisabled(!canCancel);
+    ui->actionCancelQuery->setDisabled(!canCancel);
 }
 
 void MainWindow::on_editConnectionButton_clicked()
@@ -327,4 +331,12 @@ void MainWindow::on_clearCredentialsButton_clicked()
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
     m_credentials.remove(connectionId);
     invalidateEnabledStates();
+}
+
+void MainWindow::on_cancelQueryButton_clicked()
+{
+    QueryTab *queryTab = ((QueryTab*) ui->tabBarConnections->currentWidget());
+    if (!queryTab)
+        return;
+    queryTab->cancel();
 }

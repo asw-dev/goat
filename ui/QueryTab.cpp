@@ -155,6 +155,14 @@ void QueryTab::executeQuery(const Connection &connection, Credentials *credentia
     m_queryState = ACTIVE;
     emit queryStateChanged();
     m_queryThread->start();
+
+    if (query.contains("@"))
+    {
+        QThread::sleep(1);
+        Query *cancelQuery = m_query->cancel();
+        if (cancelQuery)
+            cancelQuery->run();
+    }
 }
 
 bool QueryTab::modified() const
@@ -280,3 +288,31 @@ CodeEditor* QueryTab::codeEditor()
 {
     return ui->codeEditor;
 }
+
+bool QueryTab::canCancel()
+{
+    return m_queryState == ACTIVE && m_query && m_query->canCancel();
+}
+
+void QueryTab::cancel()
+{
+    if (!canCancel())
+        return;
+
+    Query *cancel = m_query->cancel();
+    QThread *thread = new QThread();
+    cancel->moveToThread(thread);
+    connect(thread, SIGNAL(started()), cancel, SLOT(run()));
+    connect(cancel, SIGNAL(queryFinished()), thread, SLOT(quit()));
+    connect(cancel, SIGNAL(queryFailed()), thread, SLOT(quit()));
+
+    connect(thread, SIGNAL(finished()), cancel, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), cancel, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+    m_queryState = CANCELING;
+    thread->start();
+    emit queryStateChanged();
+}
+

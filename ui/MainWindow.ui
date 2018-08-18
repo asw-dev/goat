@@ -181,6 +181,23 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="cancelQueryButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Cancel Query</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources/icons.qrc">
+            <normaloff>:/icons/silk/icons/silk/stop.png</normaloff>:/icons/silk/icons/silk/stop.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_4">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -265,6 +282,7 @@
      <string>&amp;Query</string>
     </property>
     <addaction name="actionQueryBlockAtCursor"/>
+    <addaction name="actionCancelQuery"/>
     <addaction name="separator"/>
     <addaction name="actionExportResults"/>
    </widget>
@@ -436,6 +454,15 @@
     <string>&amp;Clear Credentials</string>
    </property>
   </action>
+  <action name="actionCancelQuery">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/stop.png</normaloff>:/icons/silk/icons/silk/stop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cancel Query</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -566,6 +593,22 @@
     </hint>
     <hint type="destinationlabel">
      <x>560</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCancelQuery</sender>
+   <signal>triggered()</signal>
+   <receiver>cancelQueryButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>643</x>
      <y>53</y>
     </hint>
    </hints>

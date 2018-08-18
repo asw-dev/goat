@@ -34,6 +34,8 @@ public:
     QueryState queryState() const;
     bool hasResults();
     CodeEditor* codeEditor();
+    bool canCancel();
+    void cancel();
 
 public slots:
     void on_button_exportQueryResults_clicked();

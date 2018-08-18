@@ -44,6 +44,8 @@ class MainWindow : public QMainWindow
     void on_actionExportResults_triggered();
     void on_clearCredentialsButton_clicked();
 
+    void on_cancelQueryButton_clicked();
+
 private:
     void closeEvent(QCloseEvent *event);
     void writeSettings();

@@ -5,6 +5,7 @@ enum QueryState
 {
     READY,
     ACTIVE,
+    CANCELING,
     FINISHED,
     FAILED
 };

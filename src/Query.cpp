@@ -13,6 +13,7 @@ Query::Query(const Connection &connection, Credentials *credentials, const QStri
 {
     m_queryId = connection.connectionId() + ":" + QUuid::createUuid().toString().mid(1, 36);
     m_connection = connection;
+    m_queryProcessId = -1;
     m_credentials = credentials;
     m_queryTxt = queryTxt;
     m_rowsAffected = -1;
@@ -50,7 +51,10 @@ void Query::run()
             success = db.open();
 
         if (success)
+        {
+            initQueryProcessId(db);
             success = runQuery(db);
+        }
         else
             m_messages = db.lastError().text();
 
@@ -68,6 +72,48 @@ void Query::run()
         m_queryState = FAILED;
         emit queryFailed();
     }
+}
+
+void Query::initQueryProcessId(const QSqlDatabase &db)
+{
+    if (!canCancel())
+        return;
+
+    QSqlQuery query(db);
+
+    QString sql = "";
+    if (m_connection.driver() == "QPSQL")
+        sql = "SELECT pg_backend_pid();";
+    else if (m_connection.driver() == "QMYSQL")
+        sql = "SELECT CONNECTION_ID();";
+
+    bool success = query.exec(sql);
+
+    if (success && query.next())
+    {
+        m_queryProcessId = query.value(0).toInt();
+    }
+    query.finish();
+}
+
+bool Query::canCancel()
+{
+    return m_connection.driver() == "QPSQL"
+            || m_connection.driver() == "QMYSQL";
+}
+
+Query* Query::cancel()
+{
+    if (m_queryProcessId == -1)
+        return 0;
+
+    QString sql = "";
+    if (m_connection.driver() == "QPSQL")
+        sql = "SELECT pg_cancel_backend(" + QString::number(m_queryProcessId) + ");";
+    else if (m_connection.driver() == "QMYSQL")
+        sql = "KILL QUERY " + QString::number(m_queryProcessId);
+
+    return new Query(m_connection, m_credentials, sql);
 }
 
 int Query::rowsAffected() const { return m_rowsAffected; }
