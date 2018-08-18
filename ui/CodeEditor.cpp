@@ -1,10 +1,8 @@
 #include "CodeEditor.h"
 
-#include <QFile>
-#include <QFileDialog>
-#include <QDebug>
-#include <QTextBlock>
 #include <QShortcut>
+#include <QTextBlock>
+#include <QTextCursor>
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
@@ -14,16 +12,15 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
 
-    multilineCommentExpression.setPattern("/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/");
-    singlelineCommentExpression.setPattern("--[^\n]*");
+    m_nonQueryExpressions.append(QRegularExpression("--.*")); //comment
+    m_nonQueryExpressions.append(QRegularExpression("^\\s*$", QRegularExpression::MultilineOption)); //empty line
+    m_nonQueryExpressions.append(QRegularExpression("/\\*+[^*]*\\*+(?:[^/*][^*]*\\*+)*/", QRegularExpression::MultilineOption)); //multi-line comment
+
     m_highlighter.setDocument(document());
     highlightCurrentLine();
 }
 
-CodeEditor::~CodeEditor()
-{
-
-}
+CodeEditor::~CodeEditor() {}
 
 void CodeEditor::highlightCurrentLine()
 {
@@ -38,40 +35,89 @@ void CodeEditor::highlightCurrentLine()
     setExtraSelections(extraSelections);
 }
 
-QString CodeEditor::getSelection()
+QString CodeEditor::selectedText()
 {
-    return textCursor().selectedText().replace("\u2029", "\n", Qt::CaseInsensitive).replace(multilineCommentExpression, "").replace(singlelineCommentExpression, "");
+    return textCursor().selectedText().replace("\u2029", "\n", Qt::CaseInsensitive);
 }
 
-QString CodeEditor::getQueryAtCursor()
+void CodeEditor::selectQueryAtCursor()
 {
-    //https://stackoverflow.com/questions/50995743/qplaintextedit-qtextcursor-how-to-get-lines-above-and-below-cursor-until-abo
+    QTextCursor cursor = textCursor();
+    bool hasSelection = cursor.position() != cursor.anchor();
+    if (hasSelection)
+        return;
 
-    QTextBlock block = textCursor().block();
+    QString txt = toPlainText();
 
-    QTextBlock before = block;
-    QTextBlock after = block;
+    QList<int> lineStarts;
+    lineStarts.append(0);
+    int index = -1;
+    while ((index = txt.indexOf("\n", index + 1)) != -1)
+        lineStarts.append(index + 1);
 
-    if(block.text().trimmed().isEmpty()) return "";
-
-    QStringList lines;
-    if (!block.text().trimmed().startsWith("--")) lines.append(block.text().trimmed());
-
-    do
+    QList<int> lineEnds;
+    for(int i = 0; i < lineStarts.count(); ++i)
     {
-        before = before.previous();
-        if(before.text().trimmed().isEmpty()) break;
-        if(!before.text().trimmed().startsWith("--")) lines.prepend(before.text());
+        if (i + 1 < lineStarts.count())
+            lineEnds.append(lineStarts[i+1] - 1);
+        else
+            lineEnds.append(txt.count());
     }
-    while(before.isValid());
 
-    do
+    int startLineIdx = -1;
+    int endLineIdx;
+
+    QList<bool> isUsable;
+    for (int i = 0; i < lineStarts.count(); ++i)
+        isUsable.append(true);
+    foreach (QRegularExpression regEx, m_nonQueryExpressions) //TODO it would be better to use a sql parser instead of regex
     {
-        after = after.next();
-        if(after.text().trimmed().isEmpty()) break;
-        if(!after.text().trimmed().startsWith("--")) lines.append(after.text());
+        index = -1;
+        QRegularExpressionMatch match = regEx.match(txt, index + 1);
+        while (match.hasMatch())
+        {
+            int s = match.capturedStart();
+            int e = match.capturedEnd();
+            for (int i = 0; i < lineStarts.count(); ++i)
+            {
+                if (lineStarts[i] >= s && lineStarts[i] <= e)
+                    isUsable[i] = false;
+            }
+            match = regEx.match(txt, e + 1);
+        }
     }
-    while(after.isValid());
 
-    return lines.join("\n").replace(multilineCommentExpression, "").replace(singlelineCommentExpression, "");
+    //start with the line the cursor is on
+    for (int i = 0; i < lineStarts.count(); ++i)
+    {
+        int consider = lineStarts[i];
+        if (consider <= cursor.position())
+            startLineIdx = i;
+    }
+    endLineIdx = startLineIdx;
+
+    if (!isUsable[startLineIdx])
+        return; //cursor is not on a query
+
+    //expand the selection
+    while (true)
+    {
+            if (startLineIdx > 0 && isUsable[startLineIdx - 1])
+            {
+                --startLineIdx;
+                continue;
+            }
+
+            if (endLineIdx < lineStarts.count() - 1 && isUsable[endLineIdx + 1])
+            {
+                ++endLineIdx;
+                continue;
+            }
+
+            break;
+    }
+
+    cursor.setPosition(lineStarts[startLineIdx]);
+    cursor.setPosition(lineEnds[endLineIdx], QTextCursor::KeepAnchor);
+    setTextCursor(cursor);
 }

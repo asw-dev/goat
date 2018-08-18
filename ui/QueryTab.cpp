@@ -114,9 +114,10 @@ void QueryTab::onQueryFailure()
 
 void QueryTab::executeQuery(const Connection &connection, Credentials *credentials)
 {
-    QString query = ui->codeEditor->getQueryAtCursor();
+    ui->codeEditor->selectQueryAtCursor();
+    QString query = ui->codeEditor->selectedText().trimmed();
 
-    if (query.trimmed().isEmpty())
+    if (query.isEmpty())
         return;
 
     clearResults();

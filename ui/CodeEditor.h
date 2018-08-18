@@ -1,7 +1,10 @@
 #ifndef CODEEDITOR_H
 #define CODEEDITOR_H
 
+#include <QList>
 #include <QPlainTextEdit>
+#include <QRegularExpression>
+#include <QString>
 
 #include "ui/Highlighter.h"
 
@@ -12,16 +15,13 @@ public:
     explicit CodeEditor(QWidget *parent = nullptr);
     ~CodeEditor();
 
-    QString getQueryAtCursor();
-    QString getSelection();
+    QString selectedText();
+    void selectQueryAtCursor();
 
 private:
     void highlightCurrentLine();
     Highlighter m_highlighter;
-
-    QRegularExpression multilineCommentExpression;
-    QRegularExpression singlelineCommentExpression;
-
+    QList<QRegularExpression> m_nonQueryExpressions;
 };
 
 #endif // CODEEDITOR_H
