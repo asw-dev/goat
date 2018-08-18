@@ -5,6 +5,7 @@
 #include "ui/AboutDialog.h"
 
 #include <QCloseEvent>
+#include <QCoreApplication>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -66,7 +67,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::readSettings()
 {
-	QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "settings");
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName(), "settings");
 	settings.beginGroup("MainWindow");
 
 	resize(settings.value("size",  QSize(640, 480)).toSize());
@@ -78,7 +79,7 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-	QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "settings");
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName(), "settings");
 	settings.beginGroup("MainWindow");
 
 	settings.setValue("size", this->size());

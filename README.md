@@ -48,7 +48,7 @@ mkdir build
 cd build
 qmake ..
 make
-./Goat
+./goat
 ```
 
 # Recognitions

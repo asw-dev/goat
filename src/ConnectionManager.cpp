@@ -1,5 +1,6 @@
 #include "ConnectionManager.h"
 
+#include <QCoreApplication>
 #include <QSettings>
 #include <QString>
 
@@ -15,7 +16,7 @@ void ConnectionManager::saveConnection(const Connection &connection)
 {
     m_connections[connection.connectionId()] = connection;
 
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "connections");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName(), "connections");
 
     settings.beginGroup(connection.connectionId());
 
@@ -34,7 +35,7 @@ void ConnectionManager::saveConnection(const Connection &connection)
 
 void ConnectionManager::deleteConnection(const QString &connectionId)
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "connections");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName() , "connections");
     settings.remove(connectionId);
     settings.sync();
 }
@@ -48,7 +49,7 @@ QList<Connection> ConnectionManager::loadConnections()
 {
     QList<Connection> connections;
 
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "goat", "connections");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName() , "connections");
 
     foreach(QString connectionId, settings.childGroups())
     {
