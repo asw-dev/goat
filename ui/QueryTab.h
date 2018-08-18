@@ -3,6 +3,7 @@
 
 #include "src/QueryState.h"
 #include "src/Query.h"
+#include "ui/CodeEditor.h"
 
 #include <QString>
 #include <QWidget>
@@ -32,6 +33,7 @@ public:
     void clearResults();
     QueryState queryState() const;
     bool hasResults();
+    CodeEditor* codeEditor();
 
 public slots:
     void on_button_exportQueryResults_clicked();

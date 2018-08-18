@@ -13,7 +13,6 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWindow) {
 	ui->setupUi(this);
-    this->setFocus(); //HACK otherwise the new file button is focused, which looks weird
 	readSettings();
     on_newFileButton_clicked();
 
@@ -111,6 +110,9 @@ void MainWindow::on_tabBarConnections_tabCloseRequested(int index)
         tab->deleteLater();
 
         invalidateEnabledStates();
+        QueryTab *queryTab = (QueryTab*) ui->tabBarConnections->currentWidget();
+        if (queryTab)
+            queryTab->codeEditor()->setFocus();
     }
 }
 
@@ -130,6 +132,7 @@ void MainWindow::on_newFileButton_clicked()
     connect(queryTab, SIGNAL(textChanged()), this, SLOT(on_currentTabTextChanged()));
     connect(queryTab, SIGNAL(queryStateChanged()), this, SLOT(invalidateEnabledStates()));
     invalidateEnabledStates();
+    queryTab->codeEditor()->setFocus();
 }
 
 void MainWindow::on_newConnectionButton_clicked()
@@ -244,6 +247,7 @@ void MainWindow::on_openFileButton_clicked()
         connect(queryTab, SIGNAL(textChanged()), this, SLOT(on_currentTabTextChanged()));
         connect(queryTab, SIGNAL(queryStateChanged()), this, SLOT(invalidateEnabledStates()));
         invalidateEnabledStates();
+        queryTab->codeEditor()->setFocus();
     }
 }
 

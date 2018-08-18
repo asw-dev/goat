@@ -270,3 +270,8 @@ bool QueryTab::hasResults()
     QAbstractItemModel *model = ui->resultsGrid->model();
     return model && (model->rowCount() || model->columnCount());
 }
+
+CodeEditor* QueryTab::codeEditor()
+{
+    return ui->codeEditor;
+}
