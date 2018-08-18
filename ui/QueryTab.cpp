@@ -133,6 +133,10 @@ void QueryTab::executeQuery(const Connection &connection, Credentials *credentia
             {
                 credentials->set(connection.connectionId(), loginDialog.user(), loginDialog.pass());
             }
+            else
+            {
+                return;
+            }
         }
     }
 
