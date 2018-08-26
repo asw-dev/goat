@@ -38,7 +38,8 @@ public:
     void cancel();
 
 public slots:
-    void on_button_exportQueryResults_clicked();
+    void on_exportResultsToClipboard_clicked();
+    void on_exportResultsToFileButton_clicked();
 
 private:
     Ui::QueryTab *ui;

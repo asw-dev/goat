@@ -284,7 +284,8 @@
     <addaction name="actionQueryBlockAtCursor"/>
     <addaction name="actionCancelQuery"/>
     <addaction name="separator"/>
-    <addaction name="actionExportResults"/>
+    <addaction name="actionExportResultsToFile"/>
+    <addaction name="actionExportResultsToClipboard"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConnection"/>
@@ -430,7 +431,7 @@
     <string>Ctrl+Shift+S</string>
    </property>
   </action>
-  <action name="actionExportResults">
+  <action name="actionExportResultsToFile">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -439,7 +440,7 @@
      <normaloff>:/icons/silk/icons/silk/page_white_go.png</normaloff>:/icons/silk/icons/silk/page_white_go.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Export Results</string>
+    <string>&amp;Export Results to File</string>
    </property>
   </action>
   <action name="actionClearCredentials">
@@ -460,7 +461,19 @@
      <normaloff>:/icons/silk/icons/silk/stop.png</normaloff>:/icons/silk/icons/silk/stop.png</iconset>
    </property>
    <property name="text">
-    <string>Cancel Query</string>
+    <string>&amp;Cancel Query</string>
+   </property>
+  </action>
+  <action name="actionExportResultsToClipboard">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/page_white_copy.png</normaloff>:/icons/silk/icons/silk/page_white_copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Results to Clipboard</string>
    </property>
   </action>
  </widget>

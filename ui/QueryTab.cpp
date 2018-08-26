@@ -4,10 +4,14 @@
 #include "src/Csv.h"
 #include "ui/LoginDialog.h"
 
+#include <QAbstractItemModel>
+#include <QApplication>
+#include <QClipboard>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QFileDialog>
+#include <QItemSelection>
 #include <QMessageBox>
 
 QueryTab::QueryTab(QString filename, QWidget *parent) : QWidget(parent)
@@ -56,13 +60,13 @@ void QueryTab::onQuerySucess()
         m_query->results().pop_front();
         ui->resultsGrid->resizeColumnsToContents();
         ui->resultsTabBar->setCurrentIndex(0);
-        ui->button_exportQueryResults->setDisabled(false);
     }
     else
     {
         ui->resultsTabBar->setCurrentIndex(1);
-        ui->button_exportQueryResults->setDisabled(true);
     }
+    ui->exportResultsToFileButton->setDisabled(m_query->results().isEmpty());
+    ui->exportResultsToClipboard->setDisabled(m_query->results().isEmpty());
 
     ui->resultsText->appendPlainText("Timestamp: " + end.toString("yyyy-MM-dd hh:mm:ss"));
     ui->resultsText->appendPlainText("Elapsed: " + QString::number(start.msecsTo(end)) + " ms");
@@ -91,7 +95,8 @@ void QueryTab::onQueryFailure()
     QDateTime start = m_query->startTime();
     QDateTime end = m_query->endTime();
 
-    ui->button_exportQueryResults->setDisabled(true);
+    ui->exportResultsToFileButton->setDisabled(true);
+    ui->exportResultsToClipboard->setDisabled(true);
 
     ui->resultsTabBar->setCurrentIndex(1);
 
@@ -245,34 +250,6 @@ void QueryTab::setFilename(const QString &filename)
     m_filename = filename;
 }
 
-void QueryTab::on_button_exportQueryResults_clicked()
-{
-    if (!hasResults())
-        return;
-
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save As"), QDir::homePath(), tr("Csv files (*.csv) ;; All files (*.*)"));
-
-    if (filename.isEmpty())
-        return;
-
-    QFile file(filename);
-    if (!file.open(QFile::WriteOnly|QFile::Truncate))
-    {
-        QMessageBox messageBox;
-        messageBox.setWindowTitle("Error");
-        messageBox.setText("Error exporting file: " + filename);
-        messageBox.setIcon(QMessageBox::Critical);
-        messageBox.setStandardButtons(QMessageBox::Ok);
-        return;
-    }
-
-    QTextStream stream(&file);
-
-    Csv csvExport;
-    csvExport.write(&stream, ui->resultsGrid->model());
-    file.close();
-}
-
 QueryState QueryTab::queryState() const
 {
     return m_queryState;
@@ -316,3 +293,42 @@ void QueryTab::cancel()
     emit queryStateChanged();
 }
 
+
+void QueryTab::on_exportResultsToClipboard_clicked()
+{
+    QAbstractItemModel *model = ui->resultsGrid->model();
+    QItemSelection selection;
+    if (model->rowCount())
+        selection = QItemSelection(model->index(0, 0), model->index(model->rowCount() - 1, model->columnCount() -1));
+
+    QString text = Csv("\t", "\"").writeSelectionToString(ui->resultsGrid->model(), selection);
+    QApplication::clipboard()->setText(text);
+}
+
+void QueryTab::on_exportResultsToFileButton_clicked()
+{
+    if (!hasResults())
+        return;
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save As"), QDir::homePath(), tr("Csv files (*.csv) ;; All files (*.*)"));
+
+    if (filename.isEmpty())
+        return;
+
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QMessageBox messageBox;
+        messageBox.setWindowTitle("Error");
+        messageBox.setText("Error exporting file: " + filename);
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        return;
+    }
+
+    QTextStream stream(&file);
+
+    Csv csvExport;
+    csvExport.write(&stream, ui->resultsGrid->model());
+    file.close();
+}

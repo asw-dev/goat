@@ -25,7 +25,8 @@ SOURCES += \
     ui/QueryTab.cpp \
     src/Csv.cpp \
     src/Credentials.cpp \
-    src/Query.cpp
+    src/Query.cpp \
+    ui/TableView.cpp
 
 
 HEADERS  += \
@@ -41,14 +42,16 @@ HEADERS  += \
     src/Csv.h \
     src/QueryState.h \
     src/Credentials.h \
-    src/Query.h
+    src/Query.h \
+    ui/TableView.h
 
 FORMS    += \
     ui/MainWindow.ui \
     ui/AboutDialog.ui \
     ui/ConnectionDialog.ui \
     ui/LoginDialog.ui \
-    ui/QueryTab.ui
+    ui/QueryTab.ui \
+    ui/TableView.ui
 
 DISTFILES += \
     LICENSE \

@@ -184,7 +184,8 @@ void MainWindow::invalidateEnabledStates()
 
     ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
     ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
-    ui->actionExportResults->setDisabled(!queryTab || !queryTab->hasResults());
+    ui->actionExportResultsToFile->setDisabled(!queryTab || !queryTab->hasResults());
+    ui->actionExportResultsToClipboard->setDisabled(!queryTab || !queryTab->hasResults());
 
     bool hasCredentials = connectionAtIndex && m_credentials.contains(ui->connectionComboBox->itemData(index).toString());
     ui->clearCredentialsButton->setDisabled(!hasCredentials);
@@ -317,12 +318,20 @@ void MainWindow::on_currentTabTextChanged()
     }
 }
 
-void MainWindow::on_actionExportResults_triggered()
+void MainWindow::on_actionExportResultsToFile_triggered()
 {
     QueryTab *queryTab = ((QueryTab*) ui->tabBarConnections->currentWidget());
     if (!queryTab)
         return;
-    queryTab->on_button_exportQueryResults_clicked();
+    queryTab->on_exportResultsToFileButton_clicked();
+}
+
+void MainWindow::on_actionExportResultsToClipboard_triggered()
+{
+    QueryTab *queryTab = ((QueryTab*) ui->tabBarConnections->currentWidget());
+    if (!queryTab)
+        return;
+    queryTab->on_exportResultsToClipboard_clicked();
 }
 
 void MainWindow::on_clearCredentialsButton_clicked()

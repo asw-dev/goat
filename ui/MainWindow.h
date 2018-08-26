@@ -41,7 +41,8 @@ class MainWindow : public QMainWindow
     void on_saveFileButton_clicked();
     void on_currentTabTextChanged();
     void on_actionSaveFileAs_triggered();
-    void on_actionExportResults_triggered();
+    void on_actionExportResultsToFile_triggered();
+    void on_actionExportResultsToClipboard_triggered();
     void on_clearCredentialsButton_clicked();
 
     void on_cancelQueryButton_clicked();
