@@ -8,12 +8,7 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = goat
-TEMPLATE = app
-
-
 SOURCES += \
-    src/main.cpp \
     src/ConnectionManager.cpp \
     ui/MainWindow.cpp \
     ui/CodeEditor.cpp \
@@ -26,7 +21,8 @@ SOURCES += \
     src/Csv.cpp \
     src/Credentials.cpp \
     src/Query.cpp \
-    ui/TableView.cpp
+    ui/TableView.cpp \
+    src/StringUtils.cpp
 
 
 HEADERS  += \
@@ -43,7 +39,9 @@ HEADERS  += \
     src/QueryState.h \
     src/Credentials.h \
     src/Query.h \
-    ui/TableView.h
+    ui/TableView.h \
+    src/StringUtils.h
+
 
 FORMS    += \
     ui/MainWindow.ui \
@@ -61,4 +59,28 @@ DISTFILES += \
 RESOURCES += \
     resources/data.qrc \
     resources/icons.qrc
+
+test {
+
+    TEMPLATE = app
+    TARGET = tests
+
+    QT += testlib
+
+    HEADERS += \
+		test/TestStringUtils.h
+
+    SOURCES += \
+	    test/TestStringUtils.cpp \
+		test/test_main.cpp
+
+} else {
+
+	TEMPLATE = app
+	TARGET = goat
+
+	SOURCES += \
+		src/main.cpp
+
+}
 
