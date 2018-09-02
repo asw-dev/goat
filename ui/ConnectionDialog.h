@@ -29,6 +29,7 @@ private slots:
     void on_txtPort_textChanged(const QString &arg1);
     void on_txtDatabase_textChanged(const QString &arg1);
     void on_chooseDatabaseFileButton_clicked();
+    void on_optionDocumentionButton_clicked();
 
 private:
     Ui::ConnectionDialog *ui;

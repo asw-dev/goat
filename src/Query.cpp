@@ -1,5 +1,7 @@
 #include "Query.h"
 
+#include "StringUtils.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <QSqlDatabase>
@@ -36,16 +38,41 @@ void Query::run()
     bool success = true;
     {
         QSqlDatabase db = QSqlDatabase::addDatabase(m_connection.driver(), m_queryId);
-        db.setHostName(m_connection.details()["server"]);
-        db.setPort(m_connection.details()["port"].toInt());
-        db.setDatabaseName(m_connection.details()["database"]);
+
         QString user = "";
         QString pass = "";
 
         if (m_connection.driver() != "QSQLITE")
             m_credentials->get(m_connection.connectionId(), &user, &pass);
-        db.setUserName(user);
-        db.setPassword(pass);
+
+        if (m_connection.driver() == "QODBC")
+        {
+            QMap<QString, QString> details = m_connection.details();
+            details["user"] = user;
+            details["password"] = pass;
+
+            QMap<QString, QString> values;
+
+            foreach (QString key, details.keys())
+            {
+                values[key] = details[key];
+                values["escaped-" + key] = details[key].replace("}", "}}");
+            }
+
+            QString connection = StringUtils::interpolate(values["connection"], values);
+
+            db.setDatabaseName(connection);
+            db.setConnectOptions(m_connection.details()["options"]);
+        }
+        else
+        {
+            db.setHostName(m_connection.details()["server"]);
+            db.setPort(m_connection.details()["port"].toInt());
+            db.setDatabaseName(m_connection.details()["database"]);
+            db.setConnectOptions(m_connection.details()["options"]);
+            db.setUserName(user);
+            db.setPassword(pass);
+        }
 
         if (success)
             success = db.open();
@@ -86,6 +113,8 @@ void Query::initQueryProcessId(const QSqlDatabase &db)
         sql = "SELECT pg_backend_pid();";
     else if (m_connection.driver() == "QMYSQL")
         sql = "SELECT CONNECTION_ID();";
+    else if (m_connection.driver() == "QODBC")
+        sql = "SELECT @@SPID;";
 
     bool success = query.exec(sql);
 
@@ -99,7 +128,8 @@ void Query::initQueryProcessId(const QSqlDatabase &db)
 bool Query::canCancel()
 {
     return m_connection.driver() == "QPSQL"
-            || m_connection.driver() == "QMYSQL";
+            || m_connection.driver() == "QMYSQL"
+            || m_connection.driver() == "QODBC";
 }
 
 Query* Query::cancel()
@@ -112,6 +142,8 @@ Query* Query::cancel()
         sql = "SELECT pg_cancel_backend(" + QString::number(m_queryProcessId) + ");";
     else if (m_connection.driver() == "QMYSQL")
         sql = "KILL QUERY " + QString::number(m_queryProcessId);
+    else if (m_connection.driver() == "QODBC")
+        sql = "KILL " + QString::number(m_queryProcessId);
 
     return new Query(m_connection, m_credentials, sql);
 }

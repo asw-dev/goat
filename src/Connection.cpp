@@ -23,6 +23,15 @@ Connection Connection::defaultConnection(const QString &driver)
         details["port"] = "3306";
         details["database"] = "";
     }
+    else if (connection.driver() == "QODBC")
+    {
+        details["server"] = "localhost";
+        details["port"] = "1433";
+        details["database"] = "master";
+        details["connection"] = "DRIVER=%(library);Setup=%(setup);Server=%(server);Port=%(port);Database=%(database);UID=%(user);PWD={%(escaped-password)};";
+        details["library"] = "/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so"; //TODO other paths, drivers, and OSs
+        details["setup"] = "/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so";
+    }
     else if (connection.driver() == "QSQLITE")
     {
         details["server"] = "";
@@ -46,6 +55,10 @@ QString Connection::defaultName(const Connection &connection)
     else if (connection.driver() == "QMYSQL")
     {
         type = "mysql";
+    }
+    else if (connection.driver() == "QODBC")
+    {
+        type = "odbc";
     }
     else if (connection.driver() == "QSQLITE")
     {
