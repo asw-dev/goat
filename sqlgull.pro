@@ -77,7 +77,7 @@ test {
 } else {
 
 	TEMPLATE = app
-	TARGET = goat
+	TARGET = sqlgull
 
 	SOURCES += \
 		src/main.cpp

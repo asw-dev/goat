@@ -1,42 +1,27 @@
-# Goat
+# Sqlgull
 
-Goat - something between Heidi (sql) and Toad.
+A minimalist graphical sql client written in Qt5.
 
-An attempt in making alternative DB frontend using QT5.
+Warning: Sqlgull is currently pre-release, expect to find bugs.
 
-This app was made for 2 reasons:
-1. necessity: there is no app in native toolkit available for linux that has querying functionality (there is a plugin for kate in kde, but this just doesnt work for me; not sure about gnome)
-2. learning: improve my qt skills. i'm not a c++ developer, so please excuse shitty code quality
+# Screenshot
 
-Contributions are welcome!
+![screenshot](screenshot_main-window.png)
 
-What works:
-- connection manager saves information
-    - warning! connection manager saves passwords. always!
-- queries can be executed with ctrl-enter for current query (query where cursor is currently located), as well as for selection with a button (but not as as script yet)
-- basic syntax highlighter
+# Features
 
-Todos:
-- change how results are fetched from database, now it doesn't work with big amounts of data
-- execute query as a script
-- further improve connection manager
-    - delete connections
-    - option to save or not to save password (per connection)
-    - driver auto-selection currently doesnt work
-    - based on the driver, set default port to what makes sense
-- opening and saving files
-- autosave settings
-    - e.g. height of the bottom part of tab
-- settings dialog
-- export data
-- import data
-- general code quality improvement
-    - connection handling moved to model (i have no idea how to do that now, so this is far, far away)
+Current:
 
-To be considered:
-- move from qt classes to libpq for better error reporting (should check if it would work better)
-    - postgres is a priority here, mariadb/mysql should maybe stay with qt classes for now
-- evaluate scintilla/qscintilla or ktextedit/ktexteditor
+- supports SQLite, PostgreSQL, MySQL/MariaDB, Microsoft SQL Server (via ODBC)
+- basic syntax highlighting
+- saved connections
+- CSV & clipboard export
+
+Planned: 
+
+- database object browser
+- schema aware auto complete
+- integrated credential management
 
 # Installing
 
@@ -48,19 +33,45 @@ mkdir build
 cd build
 qmake ..
 make
-./goat
+./sqlgull
 ```
+# Configuration
+
+## Microsoft SQL
+
+You may need to install dependencies for odbc and freetds.
+
+### Ubuntu 18.04 dependencies
+
+```
+sudo apt-get install unixodbc unixodbc-dev tdsodbc freetds-dev
+```
+
+### Testing SQL Server on Linux (Ubuntu 18.04)
+
+With some work SQL Sever can run on Linux. Be make sure you qualify for the correct license of your choice (TL;DR: you likely can use a developer license for free as long as it is only for non-commercial data on non-production systems).
+
+- install docker (see [guide](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04) for instructions).
+- get container `docker pull microsoft/mssql-server-linux`
+- start server `docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=<password>' -p 1433:1433 -d microsoft/mssql-server-linux:2017-CU8`
+- run sqlcmd to create database `docker exec -it <container_id> /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P <password>`  (you can use `docker ps | grep '1433->1433' | cut -d ' ' -f 1` to find the containder_id)
+- run any setup statements you want to test with. Use the GO keyword to execute the batch of statements, ctrl+d to quit.
+```
+CREATE DATABASE db;
+GO
+USE db;
+CREATE TABLE foo (id int);
+GO
+SELECT * FROM foo;
+GO
+<ctrl+d>
+```
+- open sqlgull and perform any testing you wish to do
+- when finished you can stop the server with `docker stop <container_id>`
 
 # Recognitions
 
-Icons used are called Silk. From [here](http://www.famfamfam.com/lab/icons/silk/).
+Forked from [Goat](https://github.com/mispp/goat).
 
-# Screenshots
+Icons from [Silk](http://www.famfamfam.com/lab/icons/silk/).
 
-Connection manager
-
-[![Connection manager](https://i.imgur.com/YCDsRwq.png)](https://i.imgur.com/YCDsRwq.png)
-
-Main window
-
-[![Main window](https://i.imgur.com/NJjdtkH.png)](https://i.imgur.com/NJjdtkH.png)

@@ -6,29 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>453</height>
+    <width>500</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="font">
       <font>
-       <pointsize>80</pointsize>
+       <pointsize>42</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Goat</string>
+      <string>Sqlgull</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
-     </property>
-     <property name="margin">
-      <number>60</number>
      </property>
     </widget>
    </item>
@@ -36,12 +33,15 @@
     <widget class="QPlainTextEdit" name="plainTextEdit">
      <property name="plainText">
       <string>Code
-https://github.com/mispp/goat
+https://github.com/asw-dev/sqlgull
 License: GPL v3
+
+A fork of Goat
+https://github.com/mispp/goat
 
 Icons: Silk
 Author: Mark James
-Source: http://www.famfamfam.com/lab/icons/silk/
+http://www.famfamfam.com/lab/icons/silk/
 License: Creative Commons Attribution 2.5 License</string>
      </property>
     </widget>

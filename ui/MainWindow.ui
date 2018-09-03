@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Goat</string>
+   <string>Sqlgull</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/icons.qrc">

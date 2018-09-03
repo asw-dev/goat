@@ -27,9 +27,9 @@ Makefile*
 *build-*
 
 *.autosave
-goat.pro.user
-goat.pro.user.*
-goat.pro.user.c83d1f9
+sqlgull.pro.user
+sqlgull.pro.user.*
+sqlgull.pro.user.c83d1f9
 
 # QtCtreator Qml
 *.qmlproject.user
@@ -43,4 +43,4 @@ CMakeLists.txt.user
 .directory
 
 # custom
-goat
+sqlgull

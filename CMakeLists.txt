@@ -1,13 +1,13 @@
 find_package(Qt5 5.9.5 REQUIRED COMPONENTS Core Gui Sql)
 find_package(Qt5Sql REQUIRED)
 
-set(goat_src
+set(sqlgull_src
     src/main.cpp
     src/ConnectionManager.cpp
     src/ConnectionStandardItem.cpp
 )
 
-set(goat_ui
+set(sqlgull_ui
     ui/MainWindow.cpp
     ui/MainWindow.ui
     ui/ConnectionTab.cpp
@@ -16,13 +16,13 @@ set(goat_ui
     ui/Highlighter.cpp
 )
 
-add_executable(Goat ${SOURCES}
-    ${goat_src}
-    ${goat_ui}
+add_executable(sqlgull ${SOURCES}
+    ${sqlgull_src}
+    ${sqlgull_ui}
 )
 
-qt5_use_modules(Goat Core Sql) # This macro depends from Qt version
-target_link_libraries(Goat Qt5::Core Qt5::Gui Qt5::Sql)
+qt5_use_modules(sqlgull Core Sql) # This macro depends from Qt version
+target_link_libraries(sqlgull Qt5::Core Qt5::Gui Qt5::Sql)
 
 #FORMS    += \
 #    ui/MainWindow.ui \
