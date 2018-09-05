@@ -1,12 +1,19 @@
 #ifndef QUERYTAB_H
 #define QUERYTAB_H
 
-#include "src/QueryState.h"
+#include "src/ConnectionManager.h"
+#include "src/Credentials.h"
+#include "src/ItemModelStyleDecorator.h"
 #include "src/Query.h"
+#include "src/QueryResult.h"
+#include "src/QueryState.h"
+#include "src/WindowedItemModelDecorator.h"
 #include "ui/CodeEditor.h"
 
 #include <QString>
 #include <QWidget>
+#include <QSharedPointer>
+#include <QAbstractItemModel>
 
 namespace Ui {
 class QueryTab;
@@ -21,9 +28,9 @@ signals:
    void queryStateChanged();
 
 public:
-    explicit QueryTab(QString filename, QWidget *parent = 0);
+    QueryTab(QString filename, ConnectionManager *connectionManager, Credentials *credentials, QWidget *parent = 0);
    ~QueryTab();
-    void executeQuery(const Connection &connection, Credentials *credentials);
+    void executeQuery(const QString &connectionId);
     QString filename() const;
     void setFilename(const QString &filename);
     bool modified() const;
@@ -43,14 +50,23 @@ public slots:
 
 private:
     Ui::QueryTab *ui;
+    ConnectionManager *m_connectionManager;
+    Credentials *m_credentials;
     QString m_filename;
     QueryState m_queryState;
-    Query *m_query;
-    QThread *m_queryThread;
+    QString m_connectionId;
+    QString m_queryId;
+    ItemModelStyleDecorator m_styleDecorator;
+    QSharedPointer<WindowedItemModelDecorator> m_windowedItemModelDecorator;
+    Query *m_cancelQuery;
 
 private slots:
-    void onQuerySucess();
-    void onQueryFailure();
+    void onConnectionOpened(const QString &queryId, int pid);
+    void onColumnsLoaded(const QString &queryId, int batchIdx, int rowSetIdx, const QSharedPointer<QAbstractItemModel> &rowSet);
+    void onRowsLoaded(const QString &queryId, int batchIdx, int rowSetIdx, const QSharedPointer<QAbstractItemModel> &rowSet, const QModelIndex &first, const QModelIndex &last);
+    void onQueryFinished(const QString &queryId, int batchIdx, const QueryResult &result);
+    void onBatchFinished(const QString &queryId, bool batchSuccess, const QString &errorTxt);
+    void onQueryStateChanged(const QString &queryId, const QueryState &newState);
 };
 
 #endif // QUERYTAB_H

@@ -22,7 +22,11 @@ SOURCES += \
     src/Credentials.cpp \
     src/Query.cpp \
     ui/TableView.cpp \
-    src/StringUtils.cpp
+    src/StringUtils.cpp \
+    src/ItemModelStyleDecorator.cpp \
+    src/PagedTableModel.cpp \
+    src/QueryResult.cpp \
+    src/WindowedItemModelDecorator.cpp
 
 
 HEADERS  += \
@@ -40,7 +44,11 @@ HEADERS  += \
     src/Credentials.h \
     src/Query.h \
     ui/TableView.h \
-    src/StringUtils.h
+    src/StringUtils.h \
+    src/ItemModelStyleDecorator.h \
+    src/PagedTableModel.h \
+    src/QueryResult.h \
+    src/WindowedItemModelDecorator.h
 
 
 FORMS    += \
@@ -68,11 +76,17 @@ test {
     QT += testlib
 
     HEADERS += \
-		test/TestStringUtils.h
+		test/TestStringUtils.h \
+		test/TestPagedTableModel.h \
+		test/TestQuery.h \
+		test/TestWindowedItemModelDecorator.h
 
     SOURCES += \
 	    test/TestStringUtils.cpp \
-		test/test_main.cpp
+		test/TestPagedTableModel.cpp \
+		test/test_main.cpp \
+		test/TestQuery.cpp \
+		test/TestWindowedItemModelDecorator.cpp
 
 } else {
 

@@ -1,6 +1,8 @@
 #ifndef QUERYSTATE_H
 #define QUERYSTATE_H
 
+#include <QMetaType>
+
 enum QueryState
 {
     READY,
@@ -9,5 +11,7 @@ enum QueryState
     FINISHED,
     FAILED
 };
+
+Q_DECLARE_METATYPE(QueryState)
 
 #endif // QUERYSTATE_H

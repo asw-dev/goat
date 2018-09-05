@@ -2,6 +2,8 @@
 #include "ui_QueryTab.h"
 
 #include "src/Csv.h"
+#include "src/StringUtils.h"
+#include "src/WindowedItemModelDecorator.h"
 #include "ui/LoginDialog.h"
 
 #include <QAbstractItemModel>
@@ -14,16 +16,28 @@
 #include <QItemSelection>
 #include <QMessageBox>
 
-QueryTab::QueryTab(QString filename, QWidget *parent) : QWidget(parent)
+static void doDeleteLater(QAbstractItemModel *obj)
+{
+    obj->deleteLater();
+}
+
+QueryTab::QueryTab(QString filename, ConnectionManager *connectionManager, Credentials *credentials, QWidget *parent) : QWidget(parent)
 {
     ui = new Ui::QueryTab;
 	ui->setupUi(this);
 
     m_filename = filename;
+    m_connectionManager = connectionManager;
+    m_credentials = credentials;
     m_queryState = READY;
-    m_query = nullptr;
+    m_cancelQuery = nullptr;
 
-    ui->resultsText->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    QHeaderView *verticalHeader = ui->resultsGrid->verticalHeader();
+    verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+
+    m_windowedItemModelDecorator = QSharedPointer<WindowedItemModelDecorator>(new WindowedItemModelDecorator, doDeleteLater);
+    m_styleDecorator.setModel(m_windowedItemModelDecorator);
+    ui->resultsGrid->setModel(&m_styleDecorator);
 
     readFile();
     setModified(false);
@@ -33,92 +47,25 @@ QueryTab::QueryTab(QString filename, QWidget *parent) : QWidget(parent)
 
 QueryTab::~QueryTab()
 {
+    clearResults();
 	delete ui;
 }
 
 void QueryTab::clearResults()
 {
-    if (ui->resultsGrid->model())
-    {
-        delete ui->resultsGrid->model();
-        ui->resultsGrid->setModel(nullptr);
-    }
+    m_windowedItemModelDecorator->setModel(QSharedPointer<QAbstractItemModel>());
+	if (m_cancelQuery)
+		m_cancelQuery->deleteLater();
+	m_cancelQuery = nullptr;
     ui->resultsText->clear();
-}
-
-void QueryTab::onQuerySucess()
-{
-    if (!m_query || m_query->queryState() == ACTIVE)
-        return;
-
-    QDateTime start = m_query->startTime();
-    QDateTime end = m_query->endTime();
-
-    if (!m_query->results().isEmpty())
-    {
-        ui->resultsGrid->setModel(m_query->results()[0]);
-        m_query->results().pop_front();
-        ui->resultsGrid->resizeColumnsToContents();
-        ui->resultsTabBar->setCurrentIndex(0);
-    }
-    else
-    {
-        ui->resultsTabBar->setCurrentIndex(1);
-    }
-    ui->exportResultsToFileButton->setDisabled(m_query->results().isEmpty());
-    ui->exportResultsToClipboard->setDisabled(m_query->results().isEmpty());
-
-    ui->resultsText->appendPlainText("Timestamp: " + end.toString("yyyy-MM-dd hh:mm:ss"));
-    ui->resultsText->appendPlainText("Elapsed: " + QString::number(start.msecsTo(end)) + " ms");
-    if (m_query->results().isEmpty())
-        ui->resultsText->appendPlainText("Number of rows affected: " + QString::number(m_query->rowsAffected()));
-    ui->resultsText->appendPlainText("");
-    ui->resultsText->appendPlainText("Messages:");
-    ui->resultsText->appendPlainText("-------------------------------");
-    ui->resultsText->appendPlainText(m_query->messages());
-
-    m_queryState = FINISHED;
-    emit queryStateChanged();
-
-    m_queryThread->deleteLater();
-    m_queryThread = 0;
-
-    m_query->deleteLater();
-    m_query = 0;
-}
-
-void QueryTab::onQueryFailure()
-{
-    if (!m_query || m_query->queryState() == ACTIVE)
-        return;
-
-    QDateTime start = m_query->startTime();
-    QDateTime end = m_query->endTime();
-
-    ui->exportResultsToFileButton->setDisabled(true);
     ui->exportResultsToClipboard->setDisabled(true);
-
-    ui->resultsTabBar->setCurrentIndex(1);
-
-    ui->resultsText->appendPlainText("Timestamp: " + end.toString("yyyy-mm-dd hh:mm:ss"));
-    ui->resultsText->appendPlainText("Elapsed: " + QString::number(start.msecsTo(end)) + " ms");
-    ui->resultsText->appendPlainText("");
-    ui->resultsText->appendPlainText("Messages:");
-    ui->resultsText->appendPlainText("-------------------------------");
-    ui->resultsText->appendPlainText(m_query->messages());
-
-    m_queryState = FAILED;
-    emit queryStateChanged();
-
-    m_queryThread->deleteLater();
-    m_queryThread = 0;
-
-    m_query->deleteLater();
-    m_query = 0;
+    ui->exportResultsToFileButton->setDisabled(true);
 }
 
-void QueryTab::executeQuery(const Connection &connection, Credentials *credentials)
+void QueryTab::executeQuery(const QString &connectionId)
 {
+    Connection connection = m_connectionManager->getConnections()[connectionId];
+
     ui->codeEditor->selectQueryAtCursor();
     QString query = ui->codeEditor->selectedText().trimmed();
 
@@ -126,18 +73,19 @@ void QueryTab::executeQuery(const Connection &connection, Credentials *credentia
         return;
 
     clearResults();
+    ui->resultsTabBar->setCurrentIndex(1);
 
     if (connection.driver() != "QSQLITE")
     {
         QString user;
         QString pass;
-        credentials->get(connection.connectionId(), &user, &pass);
+        m_credentials->get(connection.connectionId(), &user, &pass);
         if (user.isEmpty())
         {
             LoginDialog loginDialog(this); //create it here so we use the gui thread
             if (loginDialog.exec() == QDialog::Accepted)
             {
-                credentials->set(connection.connectionId(), loginDialog.user(), loginDialog.pass());
+                m_credentials->set(connection.connectionId(), loginDialog.user(), loginDialog.pass());
             }
             else
             {
@@ -146,20 +94,30 @@ void QueryTab::executeQuery(const Connection &connection, Credentials *credentia
         }
     }
 
-    m_queryThread = new QThread();
-    m_query = new Query(connection, credentials, query);
-    m_query->moveToThread(m_queryThread);
+    QStringList queries;
+    queries.append(query);
 
-    connect(m_queryThread, SIGNAL(started()), m_query, SLOT(run()));
-    connect(m_query, SIGNAL(queryFinished()), m_queryThread, SLOT(quit()));
-    connect(m_query, SIGNAL(queryFailed()), m_queryThread, SLOT(quit()));
+    QThread *thread = new QThread();
+    Query *q = new Query(connection, m_credentials, queries, Connection::defaultPidQuery(connection.driver()));
+    q->setDestThread(this->thread());
 
-    connect(m_query, SIGNAL(queryFinished()), this, SLOT(onQuerySucess()));
-    connect(m_query, SIGNAL(queryFailed()), this, SLOT(onQueryFailure()));
+    m_queryId = q->queryId();
+    m_connectionId = connection.connectionId();
+    q->moveToThread(thread);
 
-    m_queryState = ACTIVE;
-    emit queryStateChanged();
-    m_queryThread->start();
+    connect(q, SIGNAL(connectionOpened(const QString&, int)), this, SLOT(onConnectionOpened(const QString&, int)));
+    connect(q, SIGNAL(columnsLoaded(const QString&, int, int, const QSharedPointer<QAbstractItemModel>&)), this, SLOT(onColumnsLoaded(const QString&, int, int, const QSharedPointer<QAbstractItemModel>&)));
+    connect(q, SIGNAL(rowsLoaded(const QString&, int, int, const QSharedPointer<QAbstractItemModel>, const QModelIndex &, const QModelIndex &)), this, SLOT(onRowsLoaded(const QString&, int, int, const QSharedPointer<QAbstractItemModel>&, const QModelIndex &, const QModelIndex &)));
+    connect(q, SIGNAL(queryFinished(const QString&, int, const QueryResult&)), this, SLOT(onQueryFinished(const QString&, int, const QueryResult&)));
+    connect(q, SIGNAL(batchFinished(const QString&, bool, const QString&)), this, SLOT(onBatchFinished(const QString&, bool, const QString&)));
+    connect(q, SIGNAL(queryStateChanged(const QString&, const QueryState&)), this, SLOT(onQueryStateChanged(const QString&, const QueryState&)));
+
+    connect(thread, SIGNAL(started()), q, SLOT(run()));
+    connect(q, SIGNAL(batchFinished(const QString&, bool, const QString&)), thread, SLOT(quit()));
+    connect(q, SIGNAL(batchFinished(const QString&, bool, const QString&)), q, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+    thread->start();
 }
 
 bool QueryTab::modified() const
@@ -260,7 +218,7 @@ CodeEditor* QueryTab::codeEditor()
 
 bool QueryTab::canCancel()
 {
-    return m_queryState == ACTIVE && m_query && m_query->canCancel();
+    return m_queryState == ACTIVE && m_cancelQuery;
 }
 
 void QueryTab::cancel()
@@ -268,23 +226,20 @@ void QueryTab::cancel()
     if (!canCancel())
         return;
 
-    Query *cancel = m_query->cancel();
     QThread *thread = new QThread();
-    cancel->moveToThread(thread);
-    connect(thread, SIGNAL(started()), cancel, SLOT(run()));
-    connect(cancel, SIGNAL(queryFinished()), thread, SLOT(quit()));
-    connect(cancel, SIGNAL(queryFailed()), thread, SLOT(quit()));
+    Query *q = m_cancelQuery;
+    m_cancelQuery = nullptr;
 
-    connect(thread, SIGNAL(finished()), cancel, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), cancel, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    q->moveToThread(thread);
+    connect(thread, SIGNAL(started()), q, SLOT(run()));
+    connect(q, SIGNAL(batchFinished(QString,bool,QString)), thread, SLOT(quit()));
+    connect(q, SIGNAL(batchFinished(QString,bool,QString)), q, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
     m_queryState = CANCELING;
     thread->start();
     emit queryStateChanged();
 }
-
 
 void QueryTab::on_exportResultsToClipboard_clicked()
 {
@@ -323,4 +278,105 @@ void QueryTab::on_exportResultsToFileButton_clicked()
     Csv csvExport;
     csvExport.write(&stream, ui->resultsGrid->model());
     file.close();
+}
+
+void QueryTab::onConnectionOpened(const QString &queryId, int pid)
+{
+    if (m_queryId != queryId)
+        return;
+
+    if (pid == -1)
+        return; //can't cancel for this connection
+
+    Connection connection = m_connectionManager->getConnections()[m_connectionId];
+
+    QMap<QString, QString> values;
+    values["pid"] = QString::number(pid);
+    QString cancelQueryTxt =  StringUtils::interpolate(Connection::defaultCancelQuery(connection.driver()), values);
+
+    QStringList queries;
+    queries.append(cancelQueryTxt);
+    m_cancelQuery = new Query(connection, m_credentials, queries);
+
+    emit queryStateChanged(); //FIXME create a new signal for canCancelChanged
+}
+
+void QueryTab::onColumnsLoaded(const QString &queryId, int batchIdx, int rowSetIdx, const QSharedPointer<QAbstractItemModel> &rowSet)
+{
+    if (m_queryId != queryId)
+        return;
+
+    if (batchIdx || rowSetIdx)
+    {
+        return; //TODO
+    }
+
+    m_windowedItemModelDecorator->setModel(rowSet);
+    m_windowedItemModelDecorator->setRange(-1, 0, -1, rowSet->columnCount() - 1);
+
+    ui->resultsGrid->resizeColumnsToContents();
+    ui->resultsTabBar->setCurrentIndex(0);
+}
+
+void QueryTab::onRowsLoaded(const QString &queryId, int batchIdx, int rowSetIdx, const QSharedPointer<QAbstractItemModel> &, const QModelIndex &, const QModelIndex &last)
+{
+    if (m_queryId != queryId)
+        return;
+
+    if (batchIdx || rowSetIdx)
+        return; //TODO
+
+    bool firstRowLoad = m_windowedItemModelDecorator->rowCount() == 0;
+    m_windowedItemModelDecorator->setRange(0, 0, last.row(), last.column());
+
+	if (firstRowLoad)
+		ui->resultsGrid->resizeColumnsToContents();
+}
+
+void QueryTab::onQueryFinished(const QString &queryId, int batchIdx, const QueryResult &result)
+{
+    if (m_queryId != queryId)
+        return;
+
+    if (batchIdx != 0)
+        return; //TODO
+
+    bool hasRowSets = !result.rowSets().isEmpty();
+    ui->exportResultsToFileButton->setDisabled(!hasRowSets);
+    ui->exportResultsToClipboard->setDisabled(!hasRowSets);
+
+    ui->resultsText->appendPlainText(tr("Started At: ") + result.start().toString("yyyy-MM-dd hh:mm:ss"));
+    ui->resultsText->appendPlainText(tr("Query Time: ") + QString::number(result.start().msecsTo(result.executed())) + " ms");
+    ui->resultsText->appendPlainText(tr("Client Time: ") + QString::number(result.executed().msecsTo(result.end())) + " ms");
+    if (result.queryState() == FINISHED)
+        ui->resultsText->appendPlainText(tr("Number of rows affected: ") + QString::number(result.rowsAffected()));
+    ui->resultsText->appendPlainText("");
+    ui->resultsText->appendPlainText(tr("Messages:"));
+    ui->resultsText->appendPlainText("-------------------------------");
+    ui->resultsText->appendPlainText(result.messages());
+}
+
+void QueryTab::onBatchFinished(const QString &queryId, bool batchSuccess, const QString &errorTxt)
+{
+    if (m_queryId != queryId)
+        return;
+
+    if (!batchSuccess)
+    {
+        ui->resultsText->appendPlainText(errorTxt);
+        ui->resultsTabBar->setCurrentIndex(1);
+    }
+
+	if (m_cancelQuery)
+		m_cancelQuery->deleteLater();
+    m_cancelQuery = nullptr;
+}
+
+void QueryTab::onQueryStateChanged(const QString &queryId, const QueryState &newState)
+{
+    if (m_queryId != queryId)
+        return;
+
+    m_queryState = newState;
+    emit queryStateChanged();
 }

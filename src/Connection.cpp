@@ -92,6 +92,28 @@ QString Connection::defaultName(const Connection &connection)
     return name;
 }
 
+QString Connection::defaultPidQuery(const QString &driver)
+{
+    if (driver == "QPSQL")
+        return "SELECT pg_backend_pid();";
+    if (driver == "QMYSQL")
+        return "SELECT CONNECTION_ID();";
+    if (driver == "QODBC")
+        return "SELECT @@SPID;";
+    return "";
+}
+
+QString Connection::defaultCancelQuery(const QString &driver)
+{
+    if (driver == "QPSQL")
+        return "SELECT pg_cancel_backend(%(pid));";
+    if (driver == "QMYSQL")
+        return "KILL QUERY %(pid);";
+    if (driver == "QODBC")
+        return "KILL %(pid);";
+    return "";
+}
+
 Connection::Connection()
 {
     m_connectionId = QUuid::createUuid().toString().mid(1, 36);

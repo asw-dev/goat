@@ -9,6 +9,8 @@ class Connection
 public:
     static Connection defaultConnection(const QString &driver = "QPSQL");
     static QString defaultName(const Connection &connection);
+    static QString defaultPidQuery(const QString &driver);
+    static QString defaultCancelQuery(const QString &driver);
 
     Connection();
     Connection(const QString &connectionId, const QString &driver, const QString &name, const QMap<QString, QString> &details);

@@ -127,7 +127,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_newFileButton_clicked()
 {
-    QueryTab *queryTab = new QueryTab("", ui->tabBarConnections);
+    QueryTab *queryTab = new QueryTab("", &m_connectionManager, &m_credentials, ui->tabBarConnections);
     ui->tabBarConnections->insertTab(ui->tabBarConnections->count(), queryTab, tr("Untitled"));
     ui->tabBarConnections->setCurrentIndex(ui->tabBarConnections->count()-1);
 
@@ -232,8 +232,7 @@ void MainWindow::on_queryBlockButton_clicked()
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
 
     QueryTab *tab = ((QueryTab*) ui->tabBarConnections->currentWidget());
-    Connection connection = m_connectionManager.getConnections()[connectionId];
-    tab->executeQuery(connection, &m_credentials);
+    tab->executeQuery(connectionId);
 }
 
 void MainWindow::on_actionCloseFile_triggered()
@@ -257,7 +256,7 @@ void MainWindow::on_openFileButton_clicked()
         }
 
         QFileInfo fileInfo(filename);
-        QueryTab *queryTab = new QueryTab(filename, ui->tabBarConnections);
+        QueryTab *queryTab = new QueryTab(filename, &m_connectionManager, &m_credentials, ui->tabBarConnections);
         ui->tabBarConnections->insertTab(ui->tabBarConnections->count(), queryTab, fileInfo.fileName());
         ui->tabBarConnections->setCurrentIndex(ui->tabBarConnections->count()-1);
 

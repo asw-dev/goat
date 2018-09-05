@@ -1,41 +1,35 @@
 #include "Query.h"
 
 #include "StringUtils.h"
+#include "PagedTableModel.h"
 
 #include <QApplication>
-#include <QDebug>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QUuid>
 
-#define LIGHT_YELLOW QColor("#FFFFE0")
-
-Query::Query(const Connection &connection, Credentials *credentials, const QString &queryTxt) : QObject()
+Query::Query(const Connection &connection, Credentials *credentials, const QStringList &queryTxt, const QString &pidQuery, const int rowBatchSize) : QObject()
 {
     m_queryId = connection.connectionId() + ":" + QUuid::createUuid().toString().mid(1, 36);
     m_connection = connection;
-    m_queryProcessId = -1;
     m_credentials = credentials;
     m_queryTxt = queryTxt;
-    m_rowsAffected = -1;
     m_queryState = READY;
+    m_pidQuery = pidQuery;
+    m_rowBatchSize = rowBatchSize;
+    m_destThread = 0;
 }
 
-Query::~Query()
-{
-    foreach(QStandardItemModel *model, m_results)
-    {
-        delete model;
-    }
-    m_results.clear();
-}
+Query::~Query() {}
 
 void Query::run()
 {
     m_queryState = ACTIVE;
-
+    emit queryStateChanged(m_queryId, m_queryState);
     bool success = true;
+    QString errorTxt = "";
+
     {
         QSqlDatabase db = QSqlDatabase::addDatabase(m_connection.driver(), m_queryId);
 
@@ -74,8 +68,7 @@ void Query::run()
             db.setPassword(pass);
         }
 
-        if (success)
-            success = db.open();
+        success = db.open();
 
         if (success)
         {
@@ -83,131 +76,144 @@ void Query::run()
             success = runQuery(db);
         }
         else
-            m_messages = db.lastError().text();
+            errorTxt = db.lastError().text();
 
-        db.close();
+        if (db.isOpen())
+            db.close();
     }
     QSqlDatabase::removeDatabase(m_queryId);
 
-    if (success)
+    m_queryState = success ? FINISHED : FAILED;
+    emit queryStateChanged(m_queryId, m_queryState);
+
+    if (m_destThread)
     {
-        m_queryState = FINISHED;
-        emit queryFinished();
+        foreach (QueryResult result, m_results)
+        {
+            foreach (QSharedPointer<QAbstractItemModel> rowSet, result.rowSets())
+            {
+                rowSet->moveToThread(m_destThread);
+            }
+        }
     }
-    else
-    {
-        m_queryState = FAILED;
-        emit queryFailed();
-    }
+
+    emit batchFinished(m_queryId, success, errorTxt);
+}
+
+void Query::setDestThread(QThread *destThread)
+{
+    m_destThread = destThread;
+}
+
+QString Query::queryId() const
+{
+    return m_queryId;
 }
 
 void Query::initQueryProcessId(const QSqlDatabase &db)
 {
-    if (!canCancel())
-        return;
+    int pid = -1;
 
-    QSqlQuery query(db);
-
-    QString sql = "";
-    if (m_connection.driver() == "QPSQL")
-        sql = "SELECT pg_backend_pid();";
-    else if (m_connection.driver() == "QMYSQL")
-        sql = "SELECT CONNECTION_ID();";
-    else if (m_connection.driver() == "QODBC")
-        sql = "SELECT @@SPID;";
-
-    bool success = query.exec(sql);
-
-    if (success && query.next())
+    if (!m_pidQuery.isEmpty())
     {
-        m_queryProcessId = query.value(0).toInt();
+        QSqlQuery query(db);
+
+        bool success = query.exec(m_pidQuery);
+
+        if (success && query.next())
+        {
+            pid = query.value(0).toInt();
+        }
+        query.finish();
     }
-    query.finish();
+
+    emit connectionOpened(m_queryId, pid);
 }
 
-bool Query::canCancel()
+static void doDeleteLater(QAbstractItemModel *obj)
 {
-    return m_connection.driver() == "QPSQL"
-            || m_connection.driver() == "QMYSQL"
-            || m_connection.driver() == "QODBC";
+    obj->deleteLater();
 }
-
-Query* Query::cancel()
-{
-    if (m_queryProcessId == -1)
-        return 0;
-
-    QString sql = "";
-    if (m_connection.driver() == "QPSQL")
-        sql = "SELECT pg_cancel_backend(" + QString::number(m_queryProcessId) + ");";
-    else if (m_connection.driver() == "QMYSQL")
-        sql = "KILL QUERY " + QString::number(m_queryProcessId);
-    else if (m_connection.driver() == "QODBC")
-        sql = "KILL " + QString::number(m_queryProcessId);
-
-    return new Query(m_connection, m_credentials, sql);
-}
-
-int Query::rowsAffected() const { return m_rowsAffected; }
 
 bool Query::runQuery(const QSqlDatabase &db)
 {
-    QSqlQuery query(db);
-    query.setForwardOnly(true);
+    m_start = QDateTime::currentDateTime();
 
-    m_startTime = QDateTime::currentDateTime();
-    bool success = query.exec(m_queryTxt);
-    m_endTime = QDateTime::currentDateTime();
-
-    if (query.isSelect())
+    bool success = true;
+    for (int batchIdx = 0; batchIdx < m_queryTxt.count(); ++batchIdx)
     {
-        do
+        QString queryTxt = m_queryTxt[batchIdx];
+        QSqlQuery query(db);
+        query.setForwardOnly(true);
+
+        QDateTime queryStart = QDateTime::currentDateTime();
+        success = query.exec(queryTxt);
+        QDateTime queryExecuted = QDateTime::currentDateTime();
+
+        QVector<QSharedPointer<QAbstractItemModel>> rowSets;
+
+        if (query.isSelect())
         {
-            QStandardItemModel *model = new QStandardItemModel();
-
-            QSqlRecord record = query.record();
-            model->setColumnCount(record.count());
-            for (int col = 0; col < record.count(); ++col)
+            int rowSetIdx = -1;
+            int lastRowSent = -1;
+            do
             {
-                model->setHeaderData(col, Qt::Horizontal, record.fieldName(col));
-            }
+                QSharedPointer<QAbstractItemModel> model = QSharedPointer<QAbstractItemModel>(new PagedTableModel(), doDeleteLater);
+                ++rowSetIdx;
 
-            for (int row = 0; query.next(); ++row)
-            {
-                record = query.record();
-                model->setRowCount(model->rowCount() + 1);
+                QSqlRecord record = query.record();
+                model->insertColumns(0, record.count());
                 for (int col = 0; col < record.count(); ++col)
                 {
-                    QModelIndex index = model->index(row, col);
-                    QVariant value = record.value(col);
-                    model->setData(index, value);
-                    if (value.isNull())
-                        model->setData(index, LIGHT_YELLOW, Qt::BackgroundRole);
+                    model->setHeaderData(col, Qt::Horizontal, record.fieldName(col));
                 }
-            }
-            m_results.append(model);
 
-            m_rowsAffected = query.numRowsAffected();
-            m_messages += "\n\n" + query.lastError().text();
-            m_messages = m_messages.trimmed();
-        } while (query.nextResult());
-    }
-    else
-    {
-        m_rowsAffected = query.numRowsAffected();
-        m_messages += query.lastError().text();
+                emit columnsLoaded(m_queryId, batchIdx, rowSetIdx, model);
+
+                for (int row = 0; query.next(); ++row)
+                {
+                    record = query.record();
+                    model->insertRows(model->rowCount(), 1);
+                    for (int col = 0; col < record.count(); ++col)
+                    {
+                        QVariant value = record.value(col);
+                        model->setData(model->index(row, col), value);
+                    }
+
+                    if ((model->rowCount() - 1) - lastRowSent >= m_rowBatchSize)
+                    {
+                        emit rowsLoaded(m_queryId, batchIdx, rowSetIdx, model, model->index(lastRowSent + 1, 0), model->index(model->rowCount() - 1, model->columnCount() - 1));
+                        lastRowSent = model->rowCount() - 1;
+                    }
+                }
+
+                if (lastRowSent != model->rowCount() - 1)
+                {
+                    emit rowsLoaded(m_queryId, batchIdx, rowSetIdx, model, model->index(lastRowSent + 1, 0), model->index(model->rowCount() - 1, model->columnCount() - 1));
+                }
+
+                rowSets.append(model);
+            } while (query.nextResult());
+        }
+        query.finish();
+
+        QDateTime queryEnd = QDateTime::currentDateTime();
+
+        QueryResult result(rowSets, query.lastError().text(), query.numRowsAffected(), success ? FINISHED : FAILED, queryStart, queryExecuted, queryEnd);
+        m_results.append(result);
+        emit queryFinished(m_queryId, batchIdx, result);
+
+        if (!success)
+            break;
     }
 
-    query.finish();
     return success;
 }
 
-QString Query::messages() const { return m_messages; }
-
-QList<QStandardItemModel *> Query::results() const { return m_results; }
+QVector<QueryResult> Query::results() const { return m_results; }
 
 QueryState Query::queryState() const { return m_queryState; }
 
-QDateTime Query::startTime() const { return m_startTime; }
+QDateTime Query::start() const { return m_start; }
 
-QDateTime Query::endTime() const { return m_endTime; }
+QDateTime Query::end() const { return m_end; }
