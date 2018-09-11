@@ -31,8 +31,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_actionExit_triggered() {
-	//this->close();
-	QApplication::exit();
+	this->close();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
