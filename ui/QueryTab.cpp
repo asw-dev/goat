@@ -160,14 +160,6 @@ void QueryTab::executeQuery(const Connection &connection, Credentials *credentia
     m_queryState = ACTIVE;
     emit queryStateChanged();
     m_queryThread->start();
-
-    if (query.contains("@"))
-    {
-        QThread::sleep(1);
-        Query *cancelQuery = m_query->cancel();
-        if (cancelQuery)
-            cancelQuery->run();
-    }
 }
 
 bool QueryTab::modified() const
