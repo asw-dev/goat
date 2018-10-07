@@ -1000,5 +1000,6 @@
         <file>icons/silk/zoom_in.png</file>
         <file>icons/silk/zoom_out.png</file>
         <file>icons/silk/zoom.png</file>
+        <file>icons/custom/seagull.png</file>
     </qresource>
 </RCC>

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/icons.qrc">
-    <normaloff>:/icons/silk/icons/silk/database.png</normaloff>:/icons/silk/icons/silk/database.png</iconset>
+    <normaloff>:/icons/silk/icons/custom/seagull.png</normaloff>:/icons/silk/icons/custom/seagull.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
