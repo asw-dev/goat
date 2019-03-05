@@ -9,80 +9,80 @@ QT       += core gui sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES += \
-    src/ConnectionManager.cpp \
-    ui/MainWindow.cpp \
-    ui/CodeEditor.cpp \
-    ui/Highlighter.cpp \
-    ui/AboutDialog.cpp \
-    src/Connection.cpp \
-    ui/ConnectionDialog.cpp \
-    ui/LoginDialog.cpp \
-    ui/QueryTab.cpp \
-    src/Csv.cpp \
-    src/Credentials.cpp \
-    src/Query.cpp \
-    ui/TableView.cpp \
-    src/StringUtils.cpp \
-    src/ItemModelStyleDecorator.cpp \
-    src/PagedTableModel.cpp \
-    src/QueryResult.cpp \
-    src/WindowedItemModelDecorator.cpp
+	src/Connection.cpp \
+	src/ConnectionManager.cpp \
+	src/Credentials.cpp \
+	src/Csv.cpp \
+	src/ItemModelStyleDecorator.cpp \
+	src/PagedTableModel.cpp \
+	src/Query.cpp \
+	src/QueryResult.cpp \
+	src/StringUtils.cpp \
+	src/WindowedItemModelDecorator.cpp \
+	ui/AboutDialog.cpp \
+	ui/CodeEditor.cpp \
+	ui/ConnectionDialog.cpp \
+	ui/Highlighter.cpp \
+	ui/LoginDialog.cpp \
+	ui/MainWindow.cpp \
+	ui/QueryTab.cpp \
+	ui/TableView.cpp
 
 
 HEADERS  += \
-    src/ConnectionManager.h \
-    ui/MainWindow.h \
-    ui/CodeEditor.h \
-    ui/Highlighter.h \
-    ui/AboutDialog.h \
-    src/Connection.h \
-    ui/ConnectionDialog.h \
-    ui/LoginDialog.h \
-    ui/QueryTab.h \
-    src/Csv.h \
-    src/QueryState.h \
-    src/Credentials.h \
-    src/Query.h \
-    ui/TableView.h \
-    src/StringUtils.h \
-    src/ItemModelStyleDecorator.h \
-    src/PagedTableModel.h \
-    src/QueryResult.h \
-    src/WindowedItemModelDecorator.h
+	src/Connection.h \
+	src/ConnectionManager.h \
+	src/Credentials.h \
+	src/Csv.h \
+	src/ItemModelStyleDecorator.h \
+	src/PagedTableModel.h \
+	src/Query.h \
+	src/QueryResult.h \
+	src/QueryState.h \
+	src/StringUtils.h \
+	src/WindowedItemModelDecorator.h \
+	ui/AboutDialog.h \
+	ui/CodeEditor.h \
+	ui/ConnectionDialog.h \
+	ui/Highlighter.h \
+	ui/LoginDialog.h \
+	ui/MainWindow.h \
+	ui/QueryTab.h \
+	ui/TableView.h
 
 
 FORMS    += \
-    ui/MainWindow.ui \
-    ui/AboutDialog.ui \
-    ui/ConnectionDialog.ui \
-    ui/LoginDialog.ui \
-    ui/QueryTab.ui \
-    ui/TableView.ui
+	ui/MainWindow.ui \
+	ui/AboutDialog.ui \
+	ui/ConnectionDialog.ui \
+	ui/LoginDialog.ui \
+	ui/QueryTab.ui \
+	ui/TableView.ui
 
 DISTFILES += \
-    LICENSE \
-    README.md \
-    CMakeLists.txt
+	LICENSE \
+	README.md \
+	CMakeLists.txt
 
 RESOURCES += \
-    resources/data.qrc \
-    resources/icons.qrc
+	resources/data.qrc \
+	resources/icons.qrc
 
 test {
 
-    TEMPLATE = app
-    TARGET = tests
+	TEMPLATE = app
+	TARGET = tests
 
-    QT += testlib
+	QT += testlib
 
-    HEADERS += \
+	HEADERS += \
 		test/TestStringUtils.h \
 		test/TestPagedTableModel.h \
 		test/TestQuery.h \
 		test/TestWindowedItemModelDecorator.h
 
-    SOURCES += \
-	    test/TestStringUtils.cpp \
+	SOURCES += \
+		test/TestStringUtils.cpp \
 		test/TestPagedTableModel.cpp \
 		test/test_main.cpp \
 		test/TestQuery.cpp \
