@@ -4,7 +4,6 @@
 #include "src/Csv.h"
 #include "src/StringUtils.h"
 #include "src/WindowedItemModelDecorator.h"
-#include "ui/LoginDialog.h"
 
 #include <QAbstractItemModel>
 #include <QApplication>
@@ -74,25 +73,6 @@ void QueryTab::executeQuery(const QString &connectionId)
 
     clearResults();
     ui->resultsTabBar->setCurrentIndex(1);
-
-    if (connection.driver() != "QSQLITE")
-    {
-        QString user;
-        QString pass;
-        m_credentials->get(connection.connectionId(), &user, &pass);
-        if (user.isEmpty())
-        {
-            LoginDialog loginDialog(this); //create it here so we use the gui thread
-            if (loginDialog.exec() == QDialog::Accepted)
-            {
-                m_credentials->set(connection.connectionId(), loginDialog.user(), loginDialog.pass());
-            }
-            else
-            {
-                return;
-            }
-        }
-    }
 
     QStringList queries;
     queries.append(query);

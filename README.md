@@ -16,10 +16,10 @@ Current:
 - basic syntax highlighting
 - saved connections
 - CSV & clipboard export
+- database object browser
 
 Planned: 
 
-- database object browser
 - schema aware auto complete
 - integrated credential management
 

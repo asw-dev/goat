@@ -1,9 +1,13 @@
 #include "ui/MainWindow.h"
 #include "ui_MainWindow.h"
-#include "ui/ConnectionDialog.h"
-#include "ui/QueryTab.h"
-#include "ui/AboutDialog.h"
 
+#include "src/DatabaseService.h"
+#include "ui/AboutDialog.h"
+#include "ui/ConnectionDialog.h"
+#include "ui/LoginDialog.h"
+#include "ui/QueryTab.h"
+
+#include <QAbstractItemModel>
 #include <QCloseEvent>
 #include <QCoreApplication>
 #include <QFileDialog>
@@ -13,6 +17,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWindow) {
 	ui->setupUi(this);
+
 	readSettings();
     on_newFileButton_clicked();
 
@@ -24,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
     if (ui->connectionComboBox->count())
         ui->connectionComboBox->setCurrentIndex(0); //TODO remember setting from last session
     connect(ui->tabBarConnections, SIGNAL(currentChanged(int)), this, SLOT(invalidateEnabledStates()));
+    resizeDocks({ui->databaseObjectDockWidget}, {300}, Qt::Horizontal); //HACK QTBUG-65592 avoid dock resize bug (fixed in Qt 5.12)
 }
 
 MainWindow::~MainWindow() {
@@ -176,6 +182,8 @@ void MainWindow::invalidateEnabledStates()
     ui->actionEditConnection->setDisabled(!connectionAtIndex);
     ui->deleteConnectionButton->setDisabled(!connectionAtIndex);
     ui->actionDeleteConnection->setDisabled(!connectionAtIndex);
+    ui->refreshMetadataButton->setDisabled(!connectionAtIndex);
+    ui->actionRefreshMetadata->setDisabled(!connectionAtIndex);
 
     bool queryExists = ui->tabBarConnections->currentIndex() != -1;
     QueryTab *queryTab = (QueryTab*) ui->tabBarConnections->currentWidget();
@@ -204,6 +212,8 @@ void MainWindow::on_editConnectionButton_clicked()
     dialog.setWindowTitle(tr("Edit Connection"));
     if(dialog.exec() == QDialog::Accepted)
     {
+        ui->databaseObjectTreeView->remove(connectionId);
+        m_credentials.remove(connectionId);
         connection = dialog.getConnection();
         m_connectionManager.saveConnection(connection);
         ui->connectionComboBox->setItemText(index, connection.name());
@@ -223,16 +233,45 @@ void MainWindow::on_deleteConnectionButton_clicked()
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
     m_connectionManager.deleteConnection(connectionId);
     ui->connectionComboBox->removeItem(index);
+    ui->databaseObjectTreeView->remove(connectionId);
     invalidateEnabledStates();
+}
+
+QDialog::DialogCode MainWindow::promptLogin(const Connection &connection)
+{
+    if (connection.driver() != "QSQLITE")
+    {
+        QString user;
+        QString pass;
+        m_credentials.get(connection.connectionId(), &user, &pass);
+        if (user.isEmpty())
+        {
+            LoginDialog loginDialog(this); //create it here so we use the gui thread
+            if (loginDialog.exec() == QDialog::Accepted)
+            {
+                m_credentials.set(connection.connectionId(), loginDialog.user(), loginDialog.pass());
+                invalidateEnabledStates();
+                return QDialog::Accepted;
+            }
+            return QDialog::Rejected;
+        }
+    }
+    return QDialog::Accepted;
 }
 
 void MainWindow::on_queryBlockButton_clicked()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    Connection connection = m_connectionManager.getConnections()[connectionId];
 
     QueryTab *tab = ((QueryTab*) ui->tabBarConnections->currentWidget());
-    tab->executeQuery(connectionId);
+
+    if (promptLogin(connection) == QDialog::DialogCode::Accepted)
+    {
+        tab->executeQuery(connectionId);
+        on_refreshMetadataButton_clicked();
+    }
 }
 
 void MainWindow::on_actionCloseFile_triggered()
@@ -346,4 +385,17 @@ void MainWindow::on_cancelQueryButton_clicked()
     if (!queryTab)
         return;
     queryTab->cancel();
+}
+
+void MainWindow::on_refreshMetadataButton_clicked()
+{
+    int index = ui->connectionComboBox->currentIndex();
+    QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    Connection connection = m_connectionManager.getConnections()[connectionId];
+
+    if (promptLogin(connection) == QDialog::DialogCode::Accepted)
+    {
+        QHash<QString /*id*/, DatabaseObjectMetadata> data = loadDatabaseMetadata(connection, &m_credentials);
+        ui->databaseObjectTreeView->set(connection, data);
+    }
 }

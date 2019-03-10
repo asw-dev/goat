@@ -13,6 +13,8 @@ SOURCES += \
 	src/ConnectionManager.cpp \
 	src/Credentials.cpp \
 	src/Csv.cpp \
+	src/DatabaseObjectMetadata.cpp \
+	src/DatabaseService.cpp \
 	src/ItemModelStyleDecorator.cpp \
 	src/PagedTableModel.cpp \
 	src/Query.cpp \
@@ -22,6 +24,7 @@ SOURCES += \
 	ui/AboutDialog.cpp \
 	ui/CodeEditor.cpp \
 	ui/ConnectionDialog.cpp \
+	ui/DatabaseObjectTreeView.cpp \
 	ui/Highlighter.cpp \
 	ui/LoginDialog.cpp \
 	ui/MainWindow.cpp \
@@ -34,6 +37,8 @@ HEADERS  += \
 	src/ConnectionManager.h \
 	src/Credentials.h \
 	src/Csv.h \
+	src/DatabaseObjectMetadata.h \
+	src/DatabaseService.h \
 	src/ItemModelStyleDecorator.h \
 	src/PagedTableModel.h \
 	src/Query.h \
@@ -44,6 +49,7 @@ HEADERS  += \
 	ui/AboutDialog.h \
 	ui/CodeEditor.h \
 	ui/ConnectionDialog.h \
+	ui/DatabaseObjectTreeView.h \
 	ui/Highlighter.h \
 	ui/LoginDialog.h \
 	ui/MainWindow.h \

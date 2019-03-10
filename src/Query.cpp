@@ -1,7 +1,8 @@
 #include "Query.h"
 
-#include "StringUtils.h"
+#include "DatabaseService.h"
 #include "PagedTableModel.h"
+#include "StringUtils.h"
 
 #include <QApplication>
 #include <QSqlDatabase>
@@ -30,43 +31,10 @@ void Query::run()
     bool success = true;
     QString errorTxt = "";
 
+    QString dbId = m_connection.connectionId() + ":" + m_queryId;
     {
-        QSqlDatabase db = QSqlDatabase::addDatabase(m_connection.driver(), m_queryId);
-
-        QString user = "";
-        QString pass = "";
-
-        if (m_connection.driver() != "QSQLITE")
-            m_credentials->get(m_connection.connectionId(), &user, &pass);
-
-        if (m_connection.driver() == "QODBC")
-        {
-            QMap<QString, QString> details = m_connection.details();
-            details["user"] = user;
-            details["password"] = pass;
-
-            QMap<QString, QString> values;
-
-            foreach (QString key, details.keys())
-            {
-                values[key] = details[key];
-                values["escaped-" + key] = details[key].replace("}", "}}");
-            }
-
-            QString connection = StringUtils::interpolate(values["connection"], values);
-
-            db.setDatabaseName(connection);
-            db.setConnectOptions(m_connection.details()["options"]);
-        }
-        else
-        {
-            db.setHostName(m_connection.details()["server"]);
-            db.setPort(m_connection.details()["port"].toInt());
-            db.setDatabaseName(m_connection.details()["database"]);
-            db.setConnectOptions(m_connection.details()["options"]);
-            db.setUserName(user);
-            db.setPassword(pass);
-        }
+        QSqlDatabase db = QSqlDatabase::addDatabase(m_connection.driver(), dbId);
+        initQSqlDatabase(db, m_connection, m_credentials);
 
         success = db.open();
 
@@ -81,7 +49,7 @@ void Query::run()
         if (db.isOpen())
             db.close();
     }
-    QSqlDatabase::removeDatabase(m_queryId);
+    QSqlDatabase::removeDatabase(dbId);
 
     m_queryState = success ? FINISHED : FAILED;
     emit queryStateChanged(m_queryId, m_queryState);

@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QDialog>
 #include <QMainWindow>
 #include <QStandardItemModel>
 
@@ -44,13 +45,14 @@ class MainWindow : public QMainWindow
     void on_actionExportResultsToFile_triggered();
     void on_actionExportResultsToClipboard_triggered();
     void on_clearCredentialsButton_clicked();
-
     void on_cancelQueryButton_clicked();
+    void on_refreshMetadataButton_clicked();
 
 private:
     void closeEvent(QCloseEvent *event);
     void writeSettings();
     void readSettings();
+    QDialog::DialogCode promptLogin(const Connection &connection);
 
     Ui::MainWindow *ui;
     ConnectionManager m_connectionManager;

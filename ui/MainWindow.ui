@@ -157,6 +157,23 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="refreshMetadataButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Refresh Metadata</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources/icons.qrc">
+            <normaloff>:/icons/silk/icons/silk/database_refresh.png</normaloff>:/icons/silk/icons/silk/database_refresh.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="Line" name="line_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -276,6 +293,7 @@
     <addaction name="actionEditConnection"/>
     <addaction name="actionDeleteConnection"/>
     <addaction name="actionClearCredentials"/>
+    <addaction name="actionRefreshMetadata"/>
    </widget>
    <widget class="QMenu" name="menuQuery">
     <property name="title">
@@ -293,6 +311,40 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="databaseObjectDockWidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="databaseObjectDockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="DatabaseObjectTreeView" name="databaseObjectTreeView">
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>false</bool>
+       </property>
+       <property name="headerHidden">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionExit">
    <property name="icon">
     <iconset resource="../resources/icons.qrc">
@@ -473,11 +525,30 @@
      <normaloff>:/icons/silk/icons/silk/page_white_copy.png</normaloff>:/icons/silk/icons/silk/page_white_copy.png</iconset>
    </property>
    <property name="text">
-    <string>Export Results to Clipboard</string>
+    <string>Export &amp;Results to Clipboard</string>
+   </property>
+  </action>
+  <action name="actionRefreshMetadata">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk/icons/silk/database_refresh.png</normaloff>:/icons/silk/icons/silk/database_refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Refresh Metadata</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>DatabaseObjectTreeView</class>
+   <extends>QTreeView</extends>
+   <header>ui/DatabaseObjectTreeView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources/icons.qrc"/>
  </resources>
@@ -622,6 +693,22 @@
     </hint>
     <hint type="destinationlabel">
      <x>643</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRefreshMetadata</sender>
+   <signal>triggered()</signal>
+   <receiver>refreshMetadataButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>870</x>
      <y>53</y>
     </hint>
    </hints>
