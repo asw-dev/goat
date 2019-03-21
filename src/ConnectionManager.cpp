@@ -38,6 +38,7 @@ void ConnectionManager::deleteConnection(const QString &connectionId)
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName() , "connections");
     settings.remove(connectionId);
     settings.sync();
+    m_metadata.remove(connectionId);
 }
 
 QMap<QString, Connection> ConnectionManager::getConnections() const
@@ -74,4 +75,14 @@ QList<Connection> ConnectionManager::loadConnections()
         settings.endGroup();
     }
     return connections;
+}
+
+QHash<QString, DatabaseObjectMetadata> ConnectionManager::getMetadata(const QString &connectionId) const
+{
+    return m_metadata[connectionId];
+}
+
+void ConnectionManager::setMetadata(const QString &connectionId, QHash<QString, DatabaseObjectMetadata> &metadata)
+{
+    m_metadata[connectionId] = metadata;
 }

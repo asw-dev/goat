@@ -24,6 +24,7 @@ QueryTab::QueryTab(QString filename, ConnectionManager *connectionManager, Crede
 {
     ui = new Ui::QueryTab;
 	ui->setupUi(this);
+    ui->codeEditor->setConnectionManager(connectionManager);
 
     m_filename = filename;
     m_connectionManager = connectionManager;
@@ -65,7 +66,7 @@ void QueryTab::executeQuery(const QString &connectionId)
 {
     Connection connection = m_connectionManager->getConnections()[connectionId];
 
-    ui->codeEditor->selectQueryAtCursor();
+    ui->codeEditor->setTextCursor(ui->codeEditor->queryAtCursor());
     QString query = ui->codeEditor->selectedText().trimmed();
 
     if (query.isEmpty())
@@ -82,7 +83,7 @@ void QueryTab::executeQuery(const QString &connectionId)
     q->setDestThread(this->thread());
 
     m_queryId = q->queryId();
-    m_connectionId = connection.connectionId();
+    setConnectionId(connection.connectionId());
     q->moveToThread(thread);
 
     connect(q, SIGNAL(connectionOpened(const QString&, int)), this, SLOT(onConnectionOpened(const QString&, int)));
@@ -258,6 +259,17 @@ void QueryTab::on_exportResultsToFileButton_clicked()
     Csv csvExport;
     csvExport.write(&stream, ui->resultsGrid->model());
     file.close();
+}
+
+QString QueryTab::connectionId() const
+{
+    return m_connectionId;
+}
+
+void QueryTab::setConnectionId(const QString &connectionId)
+{
+    m_connectionId = connectionId;
+    ui->codeEditor->setConnectionId(m_connectionId);
 }
 
 void QueryTab::onConnectionOpened(const QString &queryId, int pid)

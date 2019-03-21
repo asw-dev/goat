@@ -8,6 +8,8 @@
 #include <QString>
 #include <QStringListModel>
 
+#include "src/ConnectionManager.h"
+#include "src/DatabaseObjectMetadata.h"
 #include "ui/Highlighter.h"
 
 class CodeEditor : public QPlainTextEdit
@@ -18,7 +20,9 @@ public:
     ~CodeEditor();
 
     QString selectedText();
-    void selectQueryAtCursor();
+    QTextCursor queryAtCursor();
+    void setConnectionManager(ConnectionManager *connectionManager);
+    void setConnectionId(const QString &connectionId);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -29,11 +33,15 @@ private slots:
 private:
     void highlightCurrentLine();
     QString textUnderCursor() const;
+    void updateCompleterModel(const QString &textUnderCursor, const QString &blockText, const QString &fullText);
 
     Highlighter m_highlighter;
     QCompleter m_completer;
     QList<QRegularExpression> m_nonQueryExpressions;
     QStringListModel *m_completerModel;
+    QStringList m_sqlKeywords;
+    ConnectionManager *m_connectionManager;
+    QString m_connectionId;
 };
 
 #endif // CODEEDITOR_H

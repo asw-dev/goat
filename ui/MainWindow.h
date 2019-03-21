@@ -53,6 +53,10 @@ private:
     void writeSettings();
     void readSettings();
     QDialog::DialogCode promptLogin(const Connection &connection);
+    QueryTab* currentTab();
+    QString selectedConnectionId();
+    void setSelectedConnectionId(const QString &connectionId);
+    void updateTabConnectionId(QueryTab *tab, const QString &connectionId);
 
     Ui::MainWindow *ui;
     ConnectionManager m_connectionManager;

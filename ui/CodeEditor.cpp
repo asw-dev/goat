@@ -23,19 +23,20 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     m_highlighter.setDocument(document());
     highlightCurrentLine();
 
-    QStringList list;
     QSettings settings(":/syntax/syntax-highlight/sql.ini", QSettings::IniFormat, this);
     if (settings.value("4/TYPE").toString() == "KEYWORD")
     {
-        list = settings.value("4/ITEMS").toStringList();
+        m_sqlKeywords = settings.value("4/ITEMS").toStringList();
     }
 
+    QStringList list;
     m_completerModel = new QStringListModel(list);
     m_completer.setWidget(this);
     m_completer.setModel(m_completerModel);
     m_completer.setCaseSensitivity(Qt::CaseInsensitive);
     m_completer.setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     m_completer.setCompletionMode(QCompleter::PopupCompletion);
+    m_completer.setFilterMode(Qt::MatchContains);
     m_completer.setWrapAround(false);
     QObject::connect(&m_completer, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
 }
@@ -60,12 +61,12 @@ QString CodeEditor::selectedText()
     return textCursor().selectedText().replace("\u2029", "\n", Qt::CaseInsensitive);
 }
 
-void CodeEditor::selectQueryAtCursor()
+QTextCursor CodeEditor::queryAtCursor()
 {
     QTextCursor cursor = textCursor();
     bool hasSelection = cursor.position() != cursor.anchor();
     if (hasSelection)
-        return;
+        return cursor;
 
     QString txt = toPlainText();
 
@@ -117,7 +118,7 @@ void CodeEditor::selectQueryAtCursor()
     endLineIdx = startLineIdx;
 
     if (!isUsable[startLineIdx])
-        return; //cursor is not on a query
+        return cursor; //cursor is not on a query
 
     //expand the selection
     while (true)
@@ -139,7 +140,7 @@ void CodeEditor::selectQueryAtCursor()
 
     cursor.setPosition(lineStarts[startLineIdx]);
     cursor.setPosition(lineEnds[endLineIdx], QTextCursor::KeepAnchor);
-    setTextCursor(cursor);
+    return cursor;
 }
 
 QString CodeEditor::textUnderCursor() const
@@ -195,6 +196,9 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
 
     QString completionPrefix = textUnderCursor();
     QString oldPrefix = c->completionPrefix();
+    QString blockText = queryAtCursor().selectedText().replace("\u2029", "\n", Qt::CaseInsensitive);
+    QString fullText = toPlainText();
+    updateCompleterModel(completionPrefix, blockText, fullText);
     c->setCompletionPrefix(completionPrefix);
     c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
     QRect cr = cursorRect();
@@ -223,4 +227,52 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     {
         c->popup()->hide();
     }
+}
+
+void CodeEditor::updateCompleterModel(const QString &textUnderCursor, const QString &blockText, const QString &fullText)
+{
+    QStringList list;
+
+    foreach (QString keyword, m_sqlKeywords) {
+        if (keyword.toLower().startsWith(textUnderCursor.toLower()))
+            list += keyword;
+    }
+
+    if (m_connectionManager)
+    {
+        QHash<QString /*databasObjectId*/, DatabaseObjectMetadata> databaseMetadata = m_connectionManager->getMetadata(m_connectionId);
+
+        foreach (DatabaseObjectMetadata metadata, databaseMetadata.values())
+        {
+            if (!metadata.name().toLower().startsWith(textUnderCursor.toLower()))
+                continue;
+
+            if (metadata.type() == "table")
+                list += metadata.name();
+            else if (metadata.type() == "column")
+            {
+                if (blockText.contains(databaseMetadata[metadata.parentId()].name()))
+                    list += metadata.name();
+            }
+        }
+    }
+
+    //any previous text in the editor
+    foreach(QString word, fullText.split(QRegExp("[^a-zA-Z\\d]", Qt::CaseInsensitive)))
+    {
+        if (word.length() >= 3 && word.toLower().startsWith(textUnderCursor.toLower()) && word != textUnderCursor)
+            list += word;
+    }
+
+    m_completerModel->setStringList(list);
+}
+
+void CodeEditor::setConnectionId(const QString &connectionId)
+{
+    m_connectionId = connectionId;
+}
+
+void CodeEditor::setConnectionManager(ConnectionManager *connectionManager)
+{
+    m_connectionManager = connectionManager;
 }

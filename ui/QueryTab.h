@@ -43,6 +43,8 @@ public:
     CodeEditor* codeEditor();
     bool canCancel();
     void cancel();
+    QString connectionId() const;
+    void setConnectionId(const QString &connectionId);
 
 public slots:
     void on_exportResultsToClipboard_clicked();

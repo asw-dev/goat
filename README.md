@@ -10,18 +10,12 @@ Warning: Sqlgull is currently pre-release, expect to find bugs.
 
 # Features
 
-Current:
-
 - supports SQLite, PostgreSQL, MySQL/MariaDB, Microsoft SQL Server (via ODBC)
-- basic syntax highlighting
+- syntax highlighting
 - saved connections
 - CSV & clipboard export
 - database object browser
-
-Planned: 
-
 - schema aware auto complete
-- integrated credential management
 
 # Installing
 
