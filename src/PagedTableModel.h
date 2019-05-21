@@ -35,12 +35,17 @@ class PagedTableModel : public QAbstractItemModel
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
   private:
-    QVector<qint64> m_rowOffsets;
-    QStandardItemModel m_headerData;
+    QVector<QVariant> readRow(int row) const;
+    void appendRow(const QVector<QVariant> &data);
+
     QModelIndex m_lastInsert;
-    mutable QTemporaryFile m_tmpFile;
     mutable QCache<int, QVector<QVariant>> m_cache;
     mutable QMutex m_fileCursorMutex;
+    mutable QStandardItemModel m_headerData;
+    mutable QTemporaryFile m_dataFile;
+    mutable QTemporaryFile m_idxFile;
+    volatile int m_columns;
+    volatile int m_rows;
 };
 
 #endif // PAGEDTABLEMODEL_H
