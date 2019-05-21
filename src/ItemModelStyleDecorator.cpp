@@ -33,7 +33,6 @@ QVariant ItemModelStyleDecorator::data(const QModelIndex &index, int role) const
     {
         QVariant value = m_model->data(index2);
         return (value.isNull() ? m_nullBackground : QVariant());
-        break;
     }
     case Qt::ForegroundRole:
     {

@@ -5,10 +5,10 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 
-#include "src/Connection.h"
-#include "src/ConnectionManager.h"
-#include "src/Credentials.h"
-#include "ui/QueryTab.h"
+#include "../src/Connection.h"
+#include "../src/ConnectionManager.h"
+#include "../src/Credentials.h"
+#include "QueryTab.h"
 
 namespace Ui
 {

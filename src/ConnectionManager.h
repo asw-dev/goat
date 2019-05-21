@@ -1,12 +1,13 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
+#include <QHash>
 #include <QList>
 #include <QMap>
 #include <QString>
 
-#include "src/Connection.h"
-#include "src/DatabaseObjectMetadata.h"
+#include "Connection.h"
+#include "DatabaseObjectMetadata.h"
 
 class ConnectionManager
 {

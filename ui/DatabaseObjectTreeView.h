@@ -1,8 +1,8 @@
 #ifndef DATABASEOBJECTTREEVIEW_H
 #define DATABASEOBJECTTREEVIEW_H
 
-#include "src/Connection.h"
-#include "src/DatabaseObjectMetadata.h"
+#include "../src/Connection.h"
+#include "../src/DatabaseObjectMetadata.h"
 
 #include <QHash>
 #include <QSortFilterProxyModel>

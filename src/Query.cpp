@@ -19,7 +19,7 @@ Query::Query(const Connection &connection, Credentials *credentials, const QStri
     m_queryState = READY;
     m_pidQuery = pidQuery;
     m_rowBatchSize = rowBatchSize;
-    m_destThread = 0;
+    m_destThread = nullptr;
 }
 
 Query::~Query() {}

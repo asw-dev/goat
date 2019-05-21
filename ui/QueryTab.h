@@ -1,14 +1,14 @@
 #ifndef QUERYTAB_H
 #define QUERYTAB_H
 
-#include "src/ConnectionManager.h"
-#include "src/Credentials.h"
-#include "src/ItemModelStyleDecorator.h"
-#include "src/Query.h"
-#include "src/QueryResult.h"
-#include "src/QueryState.h"
-#include "src/WindowedItemModelDecorator.h"
-#include "ui/CodeEditor.h"
+#include "../src/ConnectionManager.h"
+#include "../src/Credentials.h"
+#include "../src/ItemModelStyleDecorator.h"
+#include "../src/Query.h"
+#include "../src/QueryResult.h"
+#include "../src/QueryState.h"
+#include "../src/WindowedItemModelDecorator.h"
+#include "CodeEditor.h"
 
 #include <QString>
 #include <QWidget>

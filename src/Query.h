@@ -1,10 +1,10 @@
 #ifndef QUERYTHREAD_H
 #define QUERYTHREAD_H
 
-#include "src/Connection.h"
-#include "src/Credentials.h"
-#include "src/QueryState.h"
-#include "src/QueryResult.h"
+#include "Connection.h"
+#include "Credentials.h"
+#include "QueryState.h"
+#include "QueryResult.h"
 
 #include <QAbstractItemModel>
 #include <QDateTime>

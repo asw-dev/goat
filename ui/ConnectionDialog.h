@@ -1,7 +1,7 @@
 #ifndef CONNECTIONDIALOG_H
 #define CONNECTIONDIALOG_H
 
-#include "src/Connection.h"
+#include "../src/Connection.h"
 
 #include <QDialog>
 #include <QStandardItemModel>

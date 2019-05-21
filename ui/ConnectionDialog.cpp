@@ -5,9 +5,9 @@
 #include <QSettings>
 #include <QUuid>
 
-#include "ui/ConnectionDialog.h"
+#include "ConnectionDialog.h"
 #include "ui_ConnectionDialog.h"
-#include "src/ConnectionManager.h"
+#include "../src/ConnectionManager.h"
 
 ConnectionDialog::ConnectionDialog(const Connection &connection, QWidget *parent) :	QDialog(parent), ui(new Ui::ConnectionDialog)
 {

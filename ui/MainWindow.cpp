@@ -1,11 +1,11 @@
 #include "ui/MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "src/DatabaseService.h"
-#include "ui/AboutDialog.h"
-#include "ui/ConnectionDialog.h"
-#include "ui/LoginDialog.h"
-#include "ui/QueryTab.h"
+#include "../src/DatabaseService.h"
+#include "AboutDialog.h"
+#include "ConnectionDialog.h"
+#include "LoginDialog.h"
+#include "QueryTab.h"
 
 #include <QAbstractItemModel>
 #include <QCloseEvent>

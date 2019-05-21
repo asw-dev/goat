@@ -8,9 +8,9 @@
 #include <QString>
 #include <QStringListModel>
 
-#include "src/ConnectionManager.h"
-#include "src/DatabaseObjectMetadata.h"
-#include "ui/Highlighter.h"
+#include "../src/ConnectionManager.h"
+#include "../src/DatabaseObjectMetadata.h"
+#include "Highlighter.h"
 
 class CodeEditor : public QPlainTextEdit
 {

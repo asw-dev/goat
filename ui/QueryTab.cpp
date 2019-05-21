@@ -1,9 +1,9 @@
 #include "QueryTab.h"
 #include "ui_QueryTab.h"
 
-#include "src/Csv.h"
-#include "src/StringUtils.h"
-#include "src/WindowedItemModelDecorator.h"
+#include "../src/Csv.h"
+#include "../src/StringUtils.h"
+#include "../src/WindowedItemModelDecorator.h"
 
 #include <QAbstractItemModel>
 #include <QApplication>
