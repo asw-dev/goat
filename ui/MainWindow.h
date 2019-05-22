@@ -31,22 +31,22 @@ class MainWindow : public QMainWindow
     void on_actionExit_triggered();
     void on_tabBarConnections_tabCloseRequested(int index);
     void on_actionAbout_triggered();
-    void on_newFileButton_clicked();
-    void on_newConnectionButton_clicked();
+    void on_actionNewFile_triggered();
+    void on_actionNewConnection_triggered();
     void on_connectionComboBox_currentIndexChanged(int index);
-    void on_editConnectionButton_clicked();
-    void on_deleteConnectionButton_clicked();
-    void on_queryBlockButton_clicked();
+    void on_actionEditConnection_triggered();
+    void on_actionDeleteConnection_triggered();
+    void on_actionQueryBlockAtCursor_triggered();
     void on_actionCloseFile_triggered();
-    void on_openFileButton_clicked();
-    void on_saveFileButton_clicked();
+    void on_actionOpenFile_triggered();
+    void on_actionSaveFile_triggered();
     void on_currentTabTextChanged();
     void on_actionSaveFileAs_triggered();
     void on_actionExportResultsToFile_triggered();
     void on_actionExportResultsToClipboard_triggered();
-    void on_clearCredentialsButton_clicked();
-    void on_cancelQueryButton_clicked();
-    void on_refreshMetadataButton_clicked();
+    void on_actionClearCredentials_triggered();
+    void on_actionCancelQuery_triggered();
+    void on_actionRefreshMetadata_triggered();
 
 private:
     void closeEvent(QCloseEvent *event);

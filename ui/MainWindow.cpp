@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
 	ui->setupUi(this);
 
 	readSettings();
-    on_newFileButton_clicked();
+    on_actionNewFile_triggered();
 
     foreach(Connection connection, m_connectionManager.getConnections().values())
     {
@@ -131,7 +131,7 @@ void MainWindow::on_actionAbout_triggered()
     dialog.exec();
 }
 
-void MainWindow::on_newFileButton_clicked()
+void MainWindow::on_actionNewFile_triggered()
 {
     QueryTab *queryTab = new QueryTab("", &m_connectionManager, &m_credentials, ui->tabBarConnections);
     queryTab->setConnectionId(selectedConnectionId());
@@ -144,7 +144,7 @@ void MainWindow::on_newFileButton_clicked()
     queryTab->codeEditor()->setFocus();
 }
 
-void MainWindow::on_newConnectionButton_clicked()
+void MainWindow::on_actionNewConnection_triggered()
 {
     Connection connection = Connection::defaultConnection();
     ConnectionDialog dialog(connection);
@@ -204,18 +204,14 @@ void MainWindow::invalidateEnabledStates()
     QueryTab *tab = currentTab();
 
     ui->actionCloseFile->setDisabled(tab == nullptr);
-    ui->saveFileButton->setDisabled(tab == nullptr);
     ui->actionSaveFile->setDisabled(tab == nullptr);
     ui->actionSaveFileAs->setDisabled(tab == nullptr);
 
     int index = ui->connectionComboBox->currentIndex();
     bool connectionAtIndex = index != -1;
 
-    ui->editConnectionButton->setDisabled(!connectionAtIndex);
     ui->actionEditConnection->setDisabled(!connectionAtIndex);
-    ui->deleteConnectionButton->setDisabled(!connectionAtIndex);
     ui->actionDeleteConnection->setDisabled(!connectionAtIndex);
-    ui->refreshMetadataButton->setDisabled(!connectionAtIndex);
     ui->actionRefreshMetadata->setDisabled(!connectionAtIndex);
 
     bool queryExists = ui->tabBarConnections->currentIndex() != -1;
@@ -224,21 +220,18 @@ void MainWindow::invalidateEnabledStates()
     if (queryTab)
         setSelectedConnectionId(queryTab->connectionId());
 
-    ui->queryBlockButton->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
     ui->actionQueryBlockAtCursor->setDisabled(!connectionAtIndex || !queryExists || !queryReady);
     ui->actionExportResultsToFile->setDisabled(!queryTab || !queryTab->hasResults());
     ui->actionExportResultsToClipboard->setDisabled(!queryTab || !queryTab->hasResults());
 
     bool hasCredentials = connectionAtIndex && m_credentials.contains(ui->connectionComboBox->itemData(index).toString());
-    ui->clearCredentialsButton->setDisabled(!hasCredentials);
     ui->actionClearCredentials->setDisabled(!hasCredentials);
 
     bool canCancel = queryTab && queryTab->canCancel();
-    ui->cancelQueryButton->setDisabled(!canCancel);
     ui->actionCancelQuery->setDisabled(!canCancel);
 }
 
-void MainWindow::on_editConnectionButton_clicked()
+void MainWindow::on_actionEditConnection_triggered()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
@@ -262,7 +255,7 @@ void MainWindow::on_editConnectionButton_clicked()
     }
 }
 
-void MainWindow::on_deleteConnectionButton_clicked()
+void MainWindow::on_actionDeleteConnection_triggered()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
@@ -294,7 +287,7 @@ QDialog::DialogCode MainWindow::promptLogin(const Connection &connection)
     return QDialog::Accepted;
 }
 
-void MainWindow::on_queryBlockButton_clicked()
+void MainWindow::on_actionQueryBlockAtCursor_triggered()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
@@ -305,7 +298,7 @@ void MainWindow::on_queryBlockButton_clicked()
     if (promptLogin(connection) == QDialog::DialogCode::Accepted)
     {
         tab->executeQuery(connectionId);
-        on_refreshMetadataButton_clicked();
+        on_actionRefreshMetadata_triggered();
     }
 }
 
@@ -314,7 +307,7 @@ void MainWindow::on_actionCloseFile_triggered()
     on_tabBarConnections_tabCloseRequested(ui->tabBarConnections->currentIndex());
 }
 
-void MainWindow::on_openFileButton_clicked()
+void MainWindow::on_actionOpenFile_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath(), tr("Sql files (*.sql) ;; All files (*.*)"));
 
@@ -359,7 +352,7 @@ void MainWindow::saveTab(QueryTab *queryTab)
     ui->tabBarConnections->setTabText(ui->tabBarConnections->currentIndex(), text);
 }
 
-void MainWindow::on_saveFileButton_clicked()
+void MainWindow::on_actionSaveFile_triggered()
 {
     QueryTab *queryTab = currentTab();
     if (queryTab->filename().isEmpty())
@@ -407,7 +400,7 @@ void MainWindow::on_actionExportResultsToClipboard_triggered()
     queryTab->on_exportResultsToClipboard_clicked();
 }
 
-void MainWindow::on_clearCredentialsButton_clicked()
+void MainWindow::on_actionClearCredentials_triggered()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
@@ -415,7 +408,7 @@ void MainWindow::on_clearCredentialsButton_clicked()
     invalidateEnabledStates();
 }
 
-void MainWindow::on_cancelQueryButton_clicked()
+void MainWindow::on_actionCancelQuery_triggered()
 {
     QueryTab *queryTab = currentTab();
     if (!queryTab)
@@ -423,7 +416,7 @@ void MainWindow::on_cancelQueryButton_clicked()
     queryTab->cancel();
 }
 
-void MainWindow::on_refreshMetadataButton_clicked()
+void MainWindow::on_actionRefreshMetadata_triggered()
 {
     int index = ui->connectionComboBox->currentIndex();
     QString connectionId = ui->connectionComboBox->itemData(index).toString();
