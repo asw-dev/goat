@@ -8,6 +8,8 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 SOURCES += \
 	src/Connection.cpp \
 	src/ConnectionManager.cpp \

@@ -22,7 +22,7 @@ public:
 private:
     QList<Connection> loadConnections();
     QMap<QString, Connection> m_connections;
-    QMap<QString /*connectionId*/, QHash<QString /*databasObjectId*/, DatabaseObjectMetadata>> m_metadata;
+    QMap<QString /*connectionId*/, QHash<QString /*databasObjectId*/, DatabaseObjectMetadata> > m_metadata;
 };
 
 #endif // CONNECTIONMANAGER_H
