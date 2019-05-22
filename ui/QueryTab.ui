@@ -71,7 +71,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QToolButton" name="exportResultsToFileButton">
+             <widget class="QPushButton" name="exportResultsToFileButton">
               <property name="enabled">
                <bool>false</bool>
               </property>
