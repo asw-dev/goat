@@ -15,6 +15,7 @@ class TableView : public QTableView
 public:
     explicit TableView(QWidget *parent = 0);
     ~TableView();
+    void writeSelectionToClipboard(bool includeHeaders);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
