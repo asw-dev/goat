@@ -10,7 +10,10 @@
 
 #include "../src/ConnectionManager.h"
 #include "../src/DatabaseObjectMetadata.h"
+#include "Completer.h"
 #include "Highlighter.h"
+#include "HtmlStyleDelegate.h"
+#include "SqlCompleterEngine.h"
 
 class CodeEditor : public QPlainTextEdit
 {
@@ -32,14 +35,13 @@ private slots:
 
 private:
     void highlightCurrentLine();
-    QString textUnderCursor() const;
     void updateCompleterModel(const QString &textUnderCursor, const QString &blockText, const QString &fullText);
 
     Highlighter m_highlighter;
-    QCompleter m_completer;
+    Completer m_completer;
+    SqlCompleterEngine m_sqlCompleterEngine;
+    HtmlStyleDelegate m_htmlStyleDelegate;
     QList<QRegularExpression> m_nonQueryExpressions;
-    QStringListModel *m_completerModel;
-    QStringList m_sqlKeywords;
     ConnectionManager *m_connectionManager;
     QString m_connectionId;
 };

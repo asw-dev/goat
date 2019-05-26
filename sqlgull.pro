@@ -25,12 +25,16 @@ SOURCES += \
 	src/WindowedItemModelDecorator.cpp \
 	ui/AboutDialog.cpp \
 	ui/CodeEditor.cpp \
+	ui/Completer.cpp \
+	ui/CompleterEngine.cpp \
 	ui/ConnectionDialog.cpp \
 	ui/DatabaseObjectTreeView.cpp \
 	ui/Highlighter.cpp \
+	ui/HtmlStyleDelegate.cpp \
 	ui/LoginDialog.cpp \
 	ui/MainWindow.cpp \
 	ui/QueryTab.cpp \
+	ui/SqlCompleterEngine.cpp \
 	ui/TableView.cpp
 
 
@@ -50,12 +54,16 @@ HEADERS  += \
 	src/WindowedItemModelDecorator.h \
 	ui/AboutDialog.h \
 	ui/CodeEditor.h \
+	ui/Completer.h \
+	ui/CompleterEngine.h \
 	ui/ConnectionDialog.h \
 	ui/DatabaseObjectTreeView.h \
 	ui/Highlighter.h \
+	ui/HtmlStyleDelegate.h \
 	ui/LoginDialog.h \
 	ui/MainWindow.h \
 	ui/QueryTab.h \
+	ui/SqlCompleterEngine.h \
 	ui/TableView.h
 
 
