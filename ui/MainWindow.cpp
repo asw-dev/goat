@@ -18,6 +18,9 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
+    //form editor does not support adding widgets to toolbar so do it with code
+    ui->toolBar->insertWidget(ui->actionNewConnection, ui->connectionComboBox);
+
 	readSettings();
     on_actionNewFile_triggered();
 
