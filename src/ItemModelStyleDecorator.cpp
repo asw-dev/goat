@@ -26,17 +26,14 @@ int ItemModelStyleDecorator::columnCount(const QModelIndex &parent) const { retu
 QVariant ItemModelStyleDecorator::data(const QModelIndex &index, int role) const
 {
     QModelIndex index2 = m_model->index(index.row(), index.column());
+    QVariant value = m_model->data(index2, Qt::DisplayRole);
 
     switch (role)
     {
     case Qt::BackgroundRole:
-    {
-        QVariant value = m_model->data(index2);
         return (value.isNull() ? m_nullBackground : QVariant());
-    }
     case Qt::ForegroundRole:
     {
-        QVariant value = m_model->data(index2);
         switch (value.type())
         {
         case QVariant::Type::Int:
@@ -56,15 +53,27 @@ QVariant ItemModelStyleDecorator::data(const QModelIndex &index, int role) const
             return QVariant();
         }
     }
+    case Qt::ToolTipRole:
+    {
+        // for long / multiline strings
+        return value.isNull() ? QVariant() : value;
+    }
+    case Qt::TextAlignmentRole:
+        return Qt::AlignTop;
     default:
     {
-        QVariant value = m_model->data(index2, role);
+        QVariant value = m_model->data(index2, role); //use the correct role here
         return value.isNull() ? m_nullValue : value.toString(); // use toString() to avoid locale differences between grid, csv, and clipboard output
     }
     }
 }
 
-QVariant ItemModelStyleDecorator::headerData(int section, Qt::Orientation orientation, int role) const { return m_model.data() ? m_model->headerData(section, orientation, role) : QVariant(); }
+QVariant ItemModelStyleDecorator::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::TextAlignmentRole)
+        return Qt::AlignLeft;
+    return m_model.data() ? m_model->headerData(section, orientation, role) : QVariant();
+}
 
 Qt::ItemFlags ItemModelStyleDecorator::flags(const QModelIndex &) const { return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; }
 
