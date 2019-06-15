@@ -13,6 +13,7 @@ class DatabaseObjectTreeView : public QTreeView
 {
 public:
     DatabaseObjectTreeView(QWidget *parent);
+    ~DatabaseObjectTreeView();
 
     QHash<QString /*id*/, DatabaseObjectMetadata> get(const Connection &connection);
     void set(const Connection &connection, const QHash<QString /*id*/, DatabaseObjectMetadata> &data);

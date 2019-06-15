@@ -13,6 +13,12 @@ DatabaseObjectTreeView::DatabaseObjectTreeView(QWidget *parent) :
     m_model->insertColumn(0);
 }
 
+DatabaseObjectTreeView::~DatabaseObjectTreeView()
+{
+    delete m_proxyModel;
+    delete m_model;
+}
+
 QHash<QString /*id*/, DatabaseObjectMetadata> DatabaseObjectTreeView::get(const Connection &connection)
 {
     return m_data[connection.connectionId()];
