@@ -26,6 +26,7 @@ public:
     QTextCursor queryAtCursor();
     void setConnectionManager(ConnectionManager *connectionManager);
     void setConnectionId(const QString &connectionId);
+    void qPlainTextEditKeyPressEvent(QKeyEvent *e) { QPlainTextEdit::keyPressEvent(e); } //HACK build on ubuntu 14.04
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;

@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
     if (ui->connectionComboBox->count())
         ui->connectionComboBox->setCurrentIndex(0); //TODO remember setting from last session
     connect(ui->tabBarConnections, SIGNAL(currentChanged(int)), this, SLOT(invalidateEnabledStates()));
-    resizeDocks({ui->databaseObjectDockWidget}, {300}, Qt::Horizontal); //HACK QTBUG-65592 avoid dock resize bug (fixed in Qt 5.12)
 }
 
 MainWindow::~MainWindow() {

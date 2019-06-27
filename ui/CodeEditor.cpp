@@ -149,7 +149,7 @@ void CodeEditor::insertCompletion(const QString &completion)
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
-    auto callback = [](QPlainTextEdit* x, QKeyEvent* y){ ((CodeEditor*) x)->QPlainTextEdit::keyPressEvent(y); };
+    auto callback = [](QPlainTextEdit* x, QKeyEvent* y){ ((CodeEditor*) x)->qPlainTextEditKeyPressEvent(y); };
     m_completer.keyPressEvent(e, callback);
 }
 
