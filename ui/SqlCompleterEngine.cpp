@@ -1,5 +1,6 @@
 #include "SqlCompleterEngine.h"
 
+#include <assert.h>
 #include <QSet>
 
 SqlCompleterEngine::~SqlCompleterEngine() {}

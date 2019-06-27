@@ -1,5 +1,6 @@
 #include "PagedTableModel.h"
-#include "assert.h"
+
+#include <assert.h>
 
 PagedTableModel::PagedTableModel(int maxCacheSize) : m_cache(maxCacheSize)
 {
