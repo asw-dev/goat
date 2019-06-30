@@ -43,6 +43,24 @@ void MainWindow::on_actionExit_triggered() {
 	this->close();
 }
 
+bool MainWindow::confirmCloseUnsavedFile()
+{
+    if (!m_confirmCloseUnsavedFiles)
+        return true;
+
+    QMessageBox confirmDialog;
+    confirmDialog.setWindowTitle(tr("Discard Unsaved Changes?"));
+    confirmDialog.setText(tr("There are unsaved changes, do you wish to discard them?"));
+    confirmDialog.setIcon(QMessageBox::Warning);
+    confirmDialog.setStandardButtons(QMessageBox::Discard | QMessageBox::Cancel);
+    confirmDialog.setMinimumSize(QSize(600, 120));
+    QSpacerItem* horizontalSpacer = new QSpacerItem(500, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    QGridLayout* layout = (QGridLayout*)confirmDialog.layout();
+    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
+
+    return confirmDialog.exec() == QMessageBox::Discard;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     bool unsavedChanges = false;
@@ -52,19 +70,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         unsavedChanges |= queryTab->modified();
     }
 
-    QMessageBox exitConfirmationDialog;
-    exitConfirmationDialog.setWindowTitle(tr("Exit?"));
-    exitConfirmationDialog.setText(tr("Are you sure you want to exit?"));
-    exitConfirmationDialog.setInformativeText(tr("All unsaved changes will be lost."));
-    exitConfirmationDialog.setIcon(QMessageBox::Warning);
-    exitConfirmationDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    exitConfirmationDialog.setMinimumSize(QSize(600, 120));
-    QSpacerItem* horizontalSpacer = new QSpacerItem(500, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QGridLayout* layout = (QGridLayout*)exitConfirmationDialog.layout();
-    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-    //TODO option to ignore this warning in the future
-
-    if(!unsavedChanges || exitConfirmationDialog.exec() == QMessageBox::Yes)
+    if(!unsavedChanges || confirmCloseUnsavedFile())
 	{
 		writeSettings();
 		event->accept();
@@ -82,6 +88,7 @@ void MainWindow::readSettings()
 
 	resize(settings.value("size",  QSize(640, 480)).toSize());
 	move(settings.value("position", QPoint(200, 200)).toPoint());
+    m_confirmCloseUnsavedFiles = settings.value("confirmCloseUnsavedFiles", true).toBool();
 
 	settings.endGroup();
 }
@@ -94,6 +101,7 @@ void MainWindow::writeSettings()
 
 	settings.setValue("size", this->size());
 	settings.setValue("position", this->pos());
+    settings.setValue("confirmCloseUnsavedFiles", m_confirmCloseUnsavedFiles);
 
 	settings.endGroup();
 }
@@ -102,19 +110,7 @@ void MainWindow::on_tabBarConnections_tabCloseRequested(int index)
 {
     QueryTab *tab = (QueryTab*) ui->tabBarConnections->widget(index);
 
-    QMessageBox closeConfirmationDialog;
-    closeConfirmationDialog.setWindowTitle(tr("Close?"));
-    closeConfirmationDialog.setText(tr("Are you sure you want to close?"));
-    closeConfirmationDialog.setInformativeText(tr("All unsaved changes will be lost."));
-    closeConfirmationDialog.setIcon(QMessageBox::Warning);
-    closeConfirmationDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    closeConfirmationDialog.setMinimumSize(QSize(600, 120));
-    QSpacerItem* horizontalSpacer = new QSpacerItem(500, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QGridLayout* layout = (QGridLayout*)closeConfirmationDialog.layout();
-    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-    //TODO option to ignore this warning in the future
-
-    if(!tab->modified() || closeConfirmationDialog.exec() == QMessageBox::Yes)
+    if(!tab->modified() || confirmCloseUnsavedFile())
     {
         ui->tabBarConnections->removeTab(index);
         tab->close();

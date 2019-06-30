@@ -57,10 +57,12 @@ private:
     QString selectedConnectionId();
     void setSelectedConnectionId(const QString &connectionId);
     void updateTabConnectionId(QueryTab *tab, const QString &connectionId);
+    bool confirmCloseUnsavedFile();
 
     Ui::MainWindow *ui;
     ConnectionManager m_connectionManager;
     Credentials m_credentials;
+    bool m_confirmCloseUnsavedFiles;
 };
 
 #endif // MAINWINDOW_H
