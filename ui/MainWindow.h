@@ -54,7 +54,7 @@ private:
     void readSettings();
     QDialog::DialogCode promptLogin(const Connection &connection);
     QueryTab* currentTab();
-    QString selectedConnectionId();
+    QString selectedConnectionId() const;
     void setSelectedConnectionId(const QString &connectionId);
     void updateTabConnectionId(QueryTab *tab, const QString &connectionId);
     bool confirmCloseUnsavedFile();

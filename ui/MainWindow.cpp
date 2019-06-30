@@ -21,16 +21,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),	ui(new Ui::MainWi
     //form editor does not support adding widgets to toolbar so do it with code
     ui->toolBar->insertWidget(ui->actionNewConnection, ui->connectionComboBox);
 
-	readSettings();
-    on_actionNewFile_triggered();
-
+    //settings contain last used connection -> load before reading settings
     foreach(Connection connection, m_connectionManager.getConnections().values())
     {
         ui->connectionComboBox->addItem(connection.name(), connection.connectionId());
     }
-    ui->connectionComboBox->model()->sort(0);
-    if (ui->connectionComboBox->count())
-        ui->connectionComboBox->setCurrentIndex(0); //TODO remember setting from last session
+
+    readSettings();
+    on_actionNewFile_triggered();
+
     connect(ui->tabBarConnections, SIGNAL(currentChanged(int)), this, SLOT(invalidateEnabledStates()));
     resizeDocks({ui->databaseObjectDockWidget}, {300}, Qt::Horizontal); //HACK QTBUG-65592 avoid dock resize bug (fixed in Qt 5.12)
 }
@@ -86,9 +85,12 @@ void MainWindow::readSettings()
 	QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::applicationName(), "settings");
 	settings.beginGroup("MainWindow");
 
+    m_confirmCloseUnsavedFiles = settings.value("confirmCloseUnsavedFiles", true).toBool();
+
+    //TODO since these change often should we move these to a cache file instead of being config?
 	resize(settings.value("size",  QSize(640, 480)).toSize());
 	move(settings.value("position", QPoint(200, 200)).toPoint());
-    m_confirmCloseUnsavedFiles = settings.value("confirmCloseUnsavedFiles", true).toBool();
+    setSelectedConnectionId(settings.value("selectedConnectionId", "").toString());
 
 	settings.endGroup();
 }
@@ -102,6 +104,7 @@ void MainWindow::writeSettings()
 	settings.setValue("size", this->size());
 	settings.setValue("position", this->pos());
     settings.setValue("confirmCloseUnsavedFiles", m_confirmCloseUnsavedFiles);
+    settings.setValue("selectedConnectionId", selectedConnectionId());
 
 	settings.endGroup();
 }
@@ -172,9 +175,7 @@ void MainWindow::setSelectedConnectionId(const QString &connectionId) {
 
 void MainWindow::on_connectionComboBox_currentIndexChanged(int)
 {
-    int index = ui->connectionComboBox->currentIndex();
-    bool connectionAtIndex = index != -1;
-    QString connectionId = connectionAtIndex ? ui->connectionComboBox->itemData(index).toString() : "";
+    QString connectionId = selectedConnectionId();
     updateTabConnectionId(currentTab(), connectionId);
 
     invalidateEnabledStates();
@@ -184,7 +185,8 @@ QueryTab* MainWindow::currentTab() {
     return (QueryTab*) ui->tabBarConnections->currentWidget();
 }
 
-QString MainWindow::selectedConnectionId() {
+QString MainWindow::selectedConnectionId() const
+{
     int index = ui->connectionComboBox->currentIndex();
     bool connectionAtIndex = index != -1;
     if (!connectionAtIndex)
@@ -206,8 +208,8 @@ void MainWindow::invalidateEnabledStates()
     ui->actionSaveFile->setDisabled(tab == nullptr);
     ui->actionSaveFileAs->setDisabled(tab == nullptr);
 
-    int index = ui->connectionComboBox->currentIndex();
-    bool connectionAtIndex = index != -1;
+    QString connectionId = selectedConnectionId();
+    bool connectionAtIndex = connectionId != "";
 
     ui->actionEditConnection->setDisabled(!connectionAtIndex);
     ui->actionDeleteConnection->setDisabled(!connectionAtIndex);
@@ -223,7 +225,7 @@ void MainWindow::invalidateEnabledStates()
     ui->actionExportResultsToFile->setDisabled(!queryTab || !queryTab->hasResults());
     ui->actionExportResultsToClipboard->setDisabled(!queryTab || !queryTab->hasResults());
 
-    bool hasCredentials = connectionAtIndex && m_credentials.contains(ui->connectionComboBox->itemData(index).toString());
+    bool hasCredentials = connectionAtIndex && m_credentials.contains(connectionId);
     ui->actionClearCredentials->setDisabled(!hasCredentials);
 
     bool canCancel = queryTab && queryTab->canCancel();
@@ -288,8 +290,7 @@ QDialog::DialogCode MainWindow::promptLogin(const Connection &connection)
 
 void MainWindow::on_actionQueryBlockAtCursor_triggered()
 {
-    int index = ui->connectionComboBox->currentIndex();
-    QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    QString connectionId = selectedConnectionId();
     Connection connection = m_connectionManager.getConnections()[connectionId];
 
     QueryTab *tab = currentTab();
@@ -401,8 +402,7 @@ void MainWindow::on_actionExportResultsToClipboard_triggered()
 
 void MainWindow::on_actionClearCredentials_triggered()
 {
-    int index = ui->connectionComboBox->currentIndex();
-    QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    QString connectionId = selectedConnectionId();
     m_credentials.remove(connectionId);
     invalidateEnabledStates();
 }
@@ -417,8 +417,7 @@ void MainWindow::on_actionCancelQuery_triggered()
 
 void MainWindow::on_actionRefreshMetadata_triggered()
 {
-    int index = ui->connectionComboBox->currentIndex();
-    QString connectionId = ui->connectionComboBox->itemData(index).toString();
+    QString connectionId = selectedConnectionId();
     Connection connection = m_connectionManager.getConnections()[connectionId];
 
     if (promptLogin(connection) == QDialog::DialogCode::Accepted)
